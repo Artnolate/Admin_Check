@@ -3,146 +3,226 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบเช็คชื่อสำหรับแอดมิน</title>
+    <title>Admin Check</title>
     <style>
-        :root { --primary: #4f46e5; --success: #10b981; --bg: #f3f4f6; }
-        body { font-family: sans-serif; background-color: var(--bg); margin: 0; padding: 20px; }
-        .container { max-width: 600px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        h2 { text-align: center; color: var(--primary); }
+        :root { 
+            --primary: #4f46e5; 
+            --success: #10b981; 
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg: #f3f4f6; 
+        }
+        body { font-family: sans-serif; background-color: var(--bg); margin: 0; padding: 20px; color: #1f2937; }
+        .container { max-width: 700px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        h2 { text-align: center; color: var(--primary); margin-top: 0; }
+        
+        /* ส่วนควบคุม: วันที่ และ แอดมิน */
+        .control-panel { background: #f9fafb; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e5e7eb; }
+        .form-group { margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+        .form-group label { font-weight: bold; width: 110px; }
+        .form-group input, .form-group select { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 15px; }
+        
         .role-selector { display: flex; gap: 10px; margin-bottom: 20px; }
         .btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; text-align: center; border: 2px solid #ccc; }
         .btn-live { background: #fee2e2; color: #dc2626; border-color: #ef4444; }
         .btn-online { background: #dbeafe; color: #2563eb; border-color: #3b82f6; }
         .btn-live.active { background: #ef4444; color: white; }
         .btn-online.active { background: #3b82f6; color: white; }
-        .search-box { width: 100%; padding: 12px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; margin-bottom: 20px; }
+        
+        /* การ์ดรายชื่อนักเรียน */
         .student-card { border: 1px solid #e5e7eb; padding: 15px; border-radius: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; background: #fff; }
         .student-info p { margin: 4px 0; }
-        .badge { background: #e0e7ff; color: #4338ca; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+        
+        /* ปุ่มสถานะต่างๆ */
         .checkin-btn { background: var(--success); color: white; padding: 10px 16px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .checked-badge { background: #d1fae5; color: #065f46; padding: 10px 16px; border-radius: 6px; font-weight: bold; font-size: 14px; }
+        .online-btn-group { display: flex; flex-direction: column; gap: 5px; }
+        .btn-sub { padding: 6px 12px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; color: white; font-size: 13px; }
+        
         .loading { text-align: center; font-style: italic; color: #666; display: none; margin: 20px 0; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
-        .modal-content { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 350px; }
-        .modal input { width: 100%; padding: 10px; margin: 10px 0 20px 0; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
-        .modal-btns { display: flex; gap: 10px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>🎯 ระบบบันทึกการเข้าเรียน (แอดมิน)</h2>
+    <h2>🎯 Admin Check</h2>
+    
+    <div class="control-panel">
+        <div class="form-group">
+            <label>📅 วันที่เช็คชื่อ:</label>
+            <input type="date" id="checkInDate">
+        </div>
+        <div class="form-group">
+            <label>🔍 เลือกวิชาภาค:</label>
+            <select id="departmentFilter" onchange="renderStudents()">
+                <option value="">-- แสดงทั้งหมด ทุกภาควิชา --</option>
+                <option value="วาดเส้น">วาดเส้น</option>
+                <option value="วิชาภาค">วิชาภาค (มัณฑนศิลป์/ออกแบบ)</option>
+                <option value="แฟชั่น">แฟชั่น</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>🔤 ค้นหาด่วน:</label>
+            <input type="text" id="search" placeholder="พิมพ์ชื่อเล่น หรือ เบอร์โทร..." oninput="renderStudents()">
+        </div>
+    </div>
     
     <div class="role-selector">
-        <button class="btn btn-live" onclick="setRole('live')">แอดมินฝั่ง [ ติวสด ]</button>
-        <button class="btn btn-online" onclick="setRole('online')">แอดมินฝั่ง [ ออนไลน์ ]</button>
+        <button class="btn btn-live" onclick="setRole('live')">แอดมิน [ ติวสด ]</button>
+        <button class="btn btn-online" onclick="setRole('online')">แอดมิน [ ออนไลน์ ]</button>
     </div>
 
-    <input type="text" id="search" class="search-box" placeholder="พิมพ์ชื่อเล่น หรือ เบอร์โทร เพื่อค้นหา..." oninput="renderStudents()">
-    <div id="loading" class="loading">⏳ กำลังดึงข้อมูลจาก Google Sheets...</div>
+    <div id="loading" class="loading">⏳ กำลังเชื่อมต่อข้อมูลระบบดิจิทัล...</div>
     <div id="student-list"></div>
 </div>
 
-<div id="checkinModal" class="modal">
-    <div class="modal-content">
-        <h3 id="modalStudentName">เช็คชื่อเข้าเรียน</h3>
-        <label>📚 วิชาที่เรียน:</label>
-        <input type="text" id="modalSubject" placeholder="เช่น วาดเส้น, วัตถุ, แฟชั่น">
-        <div class="modal-btns">
-            <button class="btn" style="background:#f3f4f6; color:#333;" onclick="closeModal()">ยกเลิก</button>
-            <button class="btn" style="background:var(--success); color:white;" onclick="submitCheckIn()">ยืนยันบันทึก</button>
-        </div>
-    </div>
-</div>
-
 <script>
-    // ⚠️ วางลิงก์ Web App (ที่ลงท้ายด้วย /exec) ของคุณในเครื่องหมายคำพูดด้านล่างนี้ครับ!
-    const API_URL = "https://script.google.com/macros/s/AKfycbwKyL3QkORniX3bT2693NYdX1lYOdWCILgM8sv2_MmJYMuZMhh7f_o3xcD1BQomLm2A/exec"; 
+    // 🔗 ลิงก์ API Web App ของคุณ
+    const API_URL = "https://script.google.com/macros/s/AKfycbx8ArZggwOq4VdTZg5LxD78pw7e21Dgi6h2BsrmL3mLl3X55SCfgM51CaUxJeFZUQVgTw/exec"; 
     
     let allStudents = [];
+    let allLogs = [];
     let currentRole = '';
-    let selectedStudent = null;
+
+    // ตั้งค่าวันที่เริ่มต้นเป็น "วันนี้ ณ ปัจจุบัน" (เวลาไทย)
+    window.onload = function() {
+        const today = new Date().toLocaleDateString('sv').split(' ')[0];
+        document.getElementById('checkInDate').value = today;
+    };
 
     function setRole(role) {
         currentRole = role;
         document.querySelector('.btn-live').classList.toggle('active', role === 'live');
         document.querySelector('.btn-online').classList.toggle('active', role === 'online');
-        fetchStudents();
+        fetchData();
     }
 
-    async function fetchStudents() {
+    // ดึงทั้งข้อมูลนักเรียน และประวัติจากหน้า Log เพื่อเอามาเช็กการซ้ำซ้อนในวันนั้น
+    async function fetchData() {
         if (!currentRole) return;
         document.getElementById('loading').style.display = 'block';
         document.getElementById('student-list').innerHTML = '';
+        
         try {
-            const response = await fetch(`${API_URL}?action=getStudents`);
-            const result = await response.json();
-            if (result.status === "success") {
-                allStudents = result.data.filter(s => s.status === "Active");
+            // 1. ดึงข้อมูลนักเรียน ปรับคอลัมน์ตามบรีฟใหม่
+            const resStudents = await fetch(`${API_URL}?action=getStudents`);
+            const dataStudents = await resStudents.json();
+            
+            // 2. ดึงประวัติทั้งหมดมาเก็บไว้ตรวจสอบสิทธิ์ซ้ำซ้อนในหน้าบ้าน
+            const resLogs = await fetch(`${API_URL}?action=getAttendanceLogs&phone=all`);
+            const dataLogs = await resLogs.json();
+
+            if (dataStudents.status === "success") {
+                allStudents = dataStudents.data.filter(s => s.status === "Active");
+                allLogs = dataLogs.status === "success" ? dataLogs.data : [];
                 renderStudents();
             }
         } catch (error) {
-            alert("ดึงข้อมูลไม่สำเร็จ กรุณาเช็คสิทธิ์ใน Apps Script ว่าเป็น Anyone หรือยัง");
+            alert("ดึงข้อมูลไม่สำเร็จ กรุณาเช็กสิทธิ์หรือการ Deploy");
         }
         document.getElementById('loading').style.display = 'none';
     }
 
     function renderStudents() {
         const searchKeyword = document.getElementById('search').value.toLowerCase().trim();
+        const deptFilter = document.getElementById('departmentFilter').value;
+        const selectedDate = document.getElementById('checkInDate').value; // ฟอร์แมต YYYY-MM-DD
+        
+        // แปลงวันที่เลือกเป็นรูปแบบ dd/MM/yyyy เพื่อเอาไปเทียบกับ Log หลังบ้าน
+        const d = new Date(selectedDate);
+        const formattedTargetDate = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+
         const container = document.getElementById('student-list');
         container.innerHTML = '';
 
         const filtered = allStudents.filter(s => {
             const matchSearch = s.nickname.toLowerCase().includes(searchKeyword) || s.phone.includes(searchKeyword);
             const courseName = s.course.toLowerCase();
-            if (currentRole === 'live') { return matchSearch && (courseName.includes('ติวสด') || courseName.includes('mix')); }
-            if (currentRole === 'online') { return matchSearch && (courseName.includes('ออนไลน์') || courseName.includes('mix')); }
+            
+            // กรองตามภาควิชาที่เลือกในคอมโบ้บ็อกซ์ (กรองจากชื่อคอร์ส)
+            const matchDept = deptFilter === "" ? true : courseName.includes(deptFilter.toLowerCase());
+            
+            if (currentRole === 'live') { return matchSearch && matchDept && (courseName.includes('ติวสด') || courseName.includes('mix')); }
+            if (currentRole === 'online') { return matchSearch && matchDept && (courseName.includes('ออนไลน์') || courseName.includes('mix')); }
             return false;
         });
 
         if(filtered.length === 0 && currentRole !== '') {
-            container.innerHTML = '<p style="text-align:center; color:#999;">ไม่พบข้อมูลรายชื่อนักเรียนในหมวดนี้</p>';
+            container.innerHTML = '<p style="text-align:center; color:#999;">ไม่พบข้อมูลรายชื่อนักเรียน</p>';
             return;
         }
 
         filtered.forEach(s => {
-            const remainText = s.course.includes('Buffet') ? 'คอร์สเหมา ไม่จำกัดครั้ง' : `เหลือ: ${s.remaining} ครั้ง`;
+            const isBuffet = s.course.includes('Buffet');
+            const remainText = isBuffet ? 'คอร์สเหมา ไม่จำกัดครั้ง' : `เหลือ: ${s.remaining} ครั้ง`;
+            
+            // 🛡️ กฎเหล็ก: ค้นหาในประวัติ Log ว่า "เบอร์นี้ + วันนี้ + รูปแบบเรียนแบบนี้" มีการเช็คชื่อไปแล้วหรือยัง
+            const isAlreadyChecked = allLogs.some(log => {
+                return log.phone === s.phone && 
+                       log.date.split(' ')[0] === formattedTargetDate && 
+                       log.classType === (currentRole === 'live' ? 'ติวสด' : 'ออนไลน์');
+            });
+
             const card = document.createElement('div');
             card.className = 'student-card';
-            card.innerHTML = `
+            
+            // โครงสร้างฝั่งข้อมูลแสดงผลคอลัมน์ A, B, C, K, L, M ตามสั่งเป๊ะครับ
+            let infoHTML = `
                 <div class="student-info">
-                    <p><b>น้อง ${s.nickname}</b> <span class="badge">รอบที่ ${s.currentRound}</span></p>
-                    <p style="font-size:14px; color:#666;">📞 ${s.phone} | 📦 ${s.course}</p>
-                    <p style="font-size:14px; color: var(--primary);">⏱️ ${remainText} | 📅 หมดอายุ: ${s.expireDate || '-'}</p>
+                    <p><b>น้อง ${s.nickname}</b> (โรงเรียน: ${s.school || '-'})</p>
+                    <p style="font-size:14px; color:#666;">📞 เบอร์โทร: ${s.phone} | 📦 คอร์ส: ${s.course}</p>
+                    <p style="font-size:14px; color: var(--primary); font-weight:bold;">⏱️ ${remainText} | 📅 หมดอายุ: ${s.expireDate || '-'}</p>
                 </div>
-                <button class="checkin-btn" onclick="openCheckInModal('${s.phone}', '${s.nickname}')">เช็คชื่อ</button>
             `;
+            
+            let actionHTML = '';
+            
+            if (isAlreadyChecked) {
+                // ถ้าเช็คซ้ำวันเดิม ให้ล็อคขึ้นสถานะทันที
+                actionHTML = `<div class="checked-badge">✓ เช็คชื่อแล้ว</div>`;
+            } else {
+                if (currentRole === 'live') {
+                    // แอดมินติวสด: ปุ่มเช็คชื่อแบบปกติ ส่งวิชาตามภาคที่กรอกหรือเลือกไว้
+                    const activeDept = deptFilter || "ติวสดทั่วไป";
+                    actionHTML = `<button class="checkin-btn" onclick="submitCheckIn('${s.phone}', '${activeDept}', 'ติวสด')">เช็คชื่อ</button>`;
+                } else {
+                    // แอดมินออนไลน์: แยกปุ่ม "ออนไลน์วิชาภาค" และ "ออนไลน์วาดเส้น" ให้กดเลือกหน้างานทันที 🎯
+                    actionHTML = `
+                        <div class="online-btn-group">
+                            <button class="btn-sub" style="background:#2563eb;" onclick="submitCheckIn('${s.phone}', 'ออนไลน์วิชาภาค', 'ออนไลน์')">🖥️ ออนไลน์วิชาภาค</button>
+                            <button class="btn-sub" style="background:#4f46e5;" onclick="submitCheckIn('${s.phone}', 'ออนไลน์วาดเส้น', 'ออนไลน์')">✏️ ออนไลน์วาดเส้น</button>
+                        </div>
+                    `;
+                }
+            }
+
+            card.innerHTML = infoHTML + actionHTML;
             container.appendChild(card);
         });
     }
 
-    function openCheckInModal(phone, nickname) {
-        selectedStudent = allStudents.find(s => s.phone === phone);
-        document.getElementById('modalStudentName').innerText = `เช็คชื่อ: น้อง ${nickname}`;
-        document.getElementById('modalSubject').value = '';
-        document.getElementById('checkinModal').style.display = 'flex';
-    }
+    async function submitCheckIn(phone, subject, classType) {
+        const selectedDate = document.getElementById('checkInDate').value;
+        if (!selectedDate) return alert("กรุณาเลือกวันที่ก่อนบันทึกครับ");
 
-    function closeModal() { document.getElementById('checkinModal').style.display = 'none'; }
-
-    async function submitCheckIn() {
-        const subject = document.getElementById('modalSubject').value.trim();
-        if (!subject) return alert("กรุณาระบุวิชาก่อนครับ");
-        const classType = currentRole === 'live' ? 'ติวสด' : 'ออนไลน์';
-        closeModal();
         document.getElementById('loading').style.display = 'block';
         try {
             const response = await fetch(API_URL, {
                 method: "POST",
                 headers: { "Content-Type": "text/plain" },
-                body: JSON.stringify({ action: "checkIn", phone: selectedStudent.phone, subject: subject, classType: classType })
+                body: JSON.stringify({ 
+                    action: "checkIn", 
+                    phone: phone, 
+                    subject: subject, 
+                    classType: classType,
+                    customDate: selectedDate // ส่งค่าวันที่ที่แอดมินเลือก (เผื่อเช็คย้อนหลัง) ไปให้ระบบหลังบ้าน
+                })
             });
             const result = await response.json();
-            if (result.status === "success") { alert("บันทึกสำเร็จ!"); fetchStudents(); }
+            if (result.status === "success") { 
+                alert("🎉 บันทึกสำเร็จ!"); 
+                fetchData(); // รีเฟรชฐานข้อมูลและเช็กสถานะซ้ำซ้อนทันที
+            }
         } catch (error) { alert("บันทึกล้มเหลว"); }
         document.getElementById('loading').style.display = 'none';
     }
