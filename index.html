@@ -3,229 +3,336 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Check</title>
+    <title>ระบบเช็คชื่อ - ARTNOLATE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { 
-            --primary: #4f46e5; 
-            --success: #10b981; 
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --bg: #f3f4f6; 
-        }
-        body { font-family: sans-serif; background-color: var(--bg); margin: 0; padding: 20px; color: #1f2937; }
-        .container { max-width: 700px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        h2 { text-align: center; color: var(--primary); margin-top: 0; }
-        
-        /* ส่วนควบคุม: วันที่ และ แอดมิน */
-        .control-panel { background: #f9fafb; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e5e7eb; }
-        .form-group { margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
-        .form-group label { font-weight: bold; width: 110px; }
-        .form-group input, .form-group select { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 15px; }
-        
-        .role-selector { display: flex; gap: 10px; margin-bottom: 20px; }
-        .btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; text-align: center; border: 2px solid #ccc; }
-        .btn-live { background: #fee2e2; color: #dc2626; border-color: #ef4444; }
-        .btn-online { background: #dbeafe; color: #2563eb; border-color: #3b82f6; }
-        .btn-live.active { background: #ef4444; color: white; }
-        .btn-online.active { background: #3b82f6; color: white; }
-        
-        /* การ์ดรายชื่อนักเรียน */
-        .student-card { border: 1px solid #e5e7eb; padding: 15px; border-radius: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; background: #fff; }
-        .student-info p { margin: 4px 0; }
-        
-        /* ปุ่มสถานะต่างๆ */
-        .checkin-btn { background: var(--success); color: white; padding: 10px 16px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
-        .checked-badge { background: #d1fae5; color: #065f46; padding: 10px 16px; border-radius: 6px; font-weight: bold; font-size: 14px; }
-        .online-btn-group { display: flex; flex-direction: column; gap: 5px; }
-        .btn-sub { padding: 6px 12px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; color: white; font-size: 13px; }
-        
-        .loading { text-align: center; font-style: italic; color: #666; display: none; margin: 20px 0; }
+        body { font-family: 'Sarabun', sans-serif; background-color: #f8fafc; }
+        .theme-blue { background-color: #244868; }
+        .theme-green { background-color: #12a13e; }
+        .text-blue { color: #244868; }
     </style>
 </head>
-<body>
+<body class="text-gray-800 antialiased">
 
-<div class="container">
-    <h2>🎯 Admin Check</h2>
-    
-    <div class="control-panel">
-        <div class="form-group">
-            <label>📅 วันที่เช็คชื่อ:</label>
-            <input type="date" id="checkInDate">
+    <header class="theme-blue text-white py-6 shadow-md">
+        <div class="max-w-6xl mx-auto px-4 text-center">
+            <h1 class="text-3xl font-bold tracking-wide"><i class="fa-solid fa-calendar-check mr-2"></i>ระบบเช็คชื่อ</h1>
+            <p class="text-sm font-light text-blue-200 mt-1 uppercase tracking-widest">ARTNOLATE</p>
         </div>
-        <div class="form-group">
-            <label>🔍 เลือกวิชาภาค:</label>
-            <select id="departmentFilter" onchange="renderStudents()">
-                <option value="">-- แสดงทั้งหมด ทุกภาควิชา --</option>
-                <option value="วาดเส้น">วาดเส้น</option>
-                <option value="วิชาภาค">วิชาภาค (มัณฑนศิลป์/ออกแบบ)</option>
-                <option value="แฟชั่น">แฟชั่น</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>🔤 ค้นหาด่วน:</label>
-            <input type="text" id="search" placeholder="พิมพ์ชื่อเล่น หรือ เบอร์โทร..." oninput="renderStudents()">
-        </div>
-    </div>
-    
-    <div class="role-selector">
-        <button class="btn btn-live" onclick="setRole('live')">แอดมิน [ ติวสด ]</button>
-        <button class="btn btn-online" onclick="setRole('online')">แอดมิน [ ออนไลน์ ]</button>
-    </div>
+    </header>
 
-    <div id="loading" class="loading">⏳ กำลังเชื่อมต่อข้อมูลระบบดิจิทัล...</div>
-    <div id="student-list"></div>
-</div>
-
-<script>
-    // 🔗 ลิงก์ API Web App ของคุณ
-    const API_URL = "https://script.google.com/macros/s/AKfycbx8ArZggwOq4VdTZg5LxD78pw7e21Dgi6h2BsrmL3mLl3X55SCfgM51CaUxJeFZUQVgTw/exec"; 
-    
-    let allStudents = [];
-    let allLogs = [];
-    let currentRole = '';
-
-    // ตั้งค่าวันที่เริ่มต้นเป็น "วันนี้ ณ ปัจจุบัน" (เวลาไทย)
-    window.onload = function() {
-        const today = new Date().toLocaleDateString('sv').split(' ')[0];
-        document.getElementById('checkInDate').value = today;
-    };
-
-    function setRole(role) {
-        currentRole = role;
-        document.querySelector('.btn-live').classList.toggle('active', role === 'live');
-        document.querySelector('.btn-online').classList.toggle('active', role === 'online');
-        fetchData();
-    }
-
-    // ดึงทั้งข้อมูลนักเรียน และประวัติจากหน้า Log เพื่อเอามาเช็กการซ้ำซ้อนในวันนั้น
-    async function fetchData() {
-        if (!currentRole) return;
-        document.getElementById('loading').style.display = 'block';
-        document.getElementById('student-list').innerHTML = '';
+    <main class="max-w-6xl mx-auto px-4 py-8">
         
-        try {
-            // 1. ดึงข้อมูลนักเรียน ปรับคอลัมน์ตามบรีฟใหม่
-            const resStudents = await fetch(`${API_URL}?action=getStudents`);
-            const dataStudents = await resStudents.json();
+        <div class="flex space-x-2 border-b border-gray-200 mb-6 bg-white p-2 rounded-xl shadow-sm">
+            <button id="tabCheckinBtn" onclick="switchTab('checkin')" class="flex-1 py-3 text-center rounded-lg font-semibold transition-all duration-200 theme-blue text-white shadow-sm">
+                <i class="fa-solid fa-user-check mr-2"></i>หน้าเช็คชื่อนักเรียน
+            </button>
+            <button id="tabReportBtn" onclick="switchTab('report')" class="flex-1 py-3 text-center rounded-lg font-semibold transition-all duration-200 text-gray-600 hover:bg-gray-50">
+                <i class="fa-solid fa-chart-pie mr-2"></i>หน้ารายงานบันทึกประจำวัน
+            </button>
+        </div>
+
+        <div id="loadingOverlay" class="hidden text-center py-12">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-indigo-500 border-t-transparent mb-4"></div>
+            <p class="text-gray-500 font-medium">กำลังดำเนินการจัดการข้อมูลแบบเรียลไทม์...</p>
+        </div>
+
+        <section id="checkinPage" class="space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-600 mb-2"><i class="fa-regular fa-calendar mr-1"></i> วันที่ทำรายการ</label>
+                    <input type="date" id="attendanceDate" class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-600 mb-2"><i class="fa-solid fa-graduation-cap mr-1"></i> เลือกภาควิชาหลัก</label>
+                    <select id="deptSelector" onchange="filterAndRender()" class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+                        <option value="">-- กรุณาเลือกภาควิชาเพื่อคัดกรองรายชื่อ --</option>
+                        <option value="ศิลปกรรม">ศิลปกรรม</option>
+                        <option value="สถาปัตยกรรม">สถาปัตยกรรม</option>
+                        <option value="ภูมิสถาปัตยกรรม/สถาปัตยกรรมไทย">ภูมิสถาปัตยกรรม/สถาปัตยกรรมไทย</option>
+                        <option value="สถาปัตยกรรมภายใน/ออกแบบภายใน">สถาปัตยกรรมภายใน/ออกแบบภายใน</option>
+                        <option value="นิเทศศิลป์/ออกแบบการสื่อสาร">นิเทศศิลป์/ออกแบบการสื่อสาร</option>
+                        <option value="ภาพยนตร์">ภาพยนตร์</option>
+                        <option value="อนิเมชัน">อนิเมชัน</option>
+                        <option value="การถ่ายภาพ">การถ่ายภาพ</option>
+                        <option value="ศิลปอุตสาหกรรม/จิวเวลรี่">ศิลปอุตสาหกรรม/จิวเวลรี่</option>
+                        <option value="แฟชั่น">แฟชั่น</option>
+                        <option value="พื้นฐาน">พื้นฐาน</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="studentContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="col-span-full bg-white p-8 rounded-2xl text-center text-gray-400 border border-dashed border-gray-200">
+                    <i class="fa-solid fa-folder-open text-4xl mb-2"></i>
+                    <p>กรุณาเลือกภาควิชาเพื่อดึงรายชื่อนักเรียนที่มีสถานะ Active</p>
+                </div>
+            </div>
             
-            // 2. ดึงประวัติทั้งหมดมาเก็บไว้ตรวจสอบสิทธิ์ซ้ำซ้อนในหน้าบ้าน
-            const resLogs = await fetch(`${API_URL}?action=getAttendanceLogs&phone=all`);
-            const dataLogs = await resLogs.json();
+            <div class="flex flex-wrap gap-3 pt-4">
+                <button onclick="fetchDataFromServer()" class="px-5 py-3 bg-gray-600 text-white font-medium rounded-xl hover:bg-gray-700 transition shadow-sm">
+                    <i class="fa-solid fa-arrow-rotate-right mr-2"></i>เรียกดูข้อมูลจาก Google Sheet
+                </button>
+                <a id="sheetLink" href="https://docs.google.com/spreadsheets/d/1BkBNWJF7Qb0YYC5FofrPGXvH3r3ioQ5sy6MWlIquLwo/edit?gid=1468492944" target="_blank" class="px-5 py-3 bg-amber-600 text-white font-medium rounded-xl hover:bg-amber-700 transition shadow-sm inline-flex items-center">
+                    <i class="fa-solid fa-table mr-2"></i>แสดงข้อมูล Google Sheet
+                </a>
+            </div>
+        </section>
 
-            if (dataStudents.status === "success") {
-                allStudents = dataStudents.data.filter(s => s.status === "Active");
-                allLogs = dataLogs.status === "success" ? dataLogs.data : [];
-                renderStudents();
-            }
-        } catch (error) {
-            alert("ดึงข้อมูลไม่สำเร็จ กรุณาเช็กสิทธิ์หรือการ Deploy");
-        }
-        document.getElementById('loading').style.display = 'none';
-    }
+        <section id="reportPage" class="hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <h3 class="text-xl font-bold text-blue mb-4"><i class="fa-solid fa-clock-rotate-left mr-2"></i>ประวัติการเช็คชื่อตามวันที่เลือก</h3>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50 border-b border-gray-100 text-gray-600 font-semibold text-sm">
+                                <th class="p-4">นักเรียน</th>
+                                <th class="p-4">โรงเรียน</th>
+                                <th class="p-4">เบอร์โทรศัพท์</th>
+                                <th class="p-4">วิชาที่เข้าเรียน</th>
+                                <th class="p-4">รูปแบบการเข้าเรียน</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reportTableBody" class="divide-y divide-gray-100 text-sm">
+                            <tr>
+                                <td colspan="5" class="p-8 text-center text-gray-400">ไม่มีข้อมูลบันทึกในวันที่เลือกข้างต้น</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
 
-    function renderStudents() {
-        const searchKeyword = document.getElementById('search').value.toLowerCase().trim();
-        const deptFilter = document.getElementById('departmentFilter').value;
-        const selectedDate = document.getElementById('checkInDate').value; // ฟอร์แมต YYYY-MM-DD
-        
-        // แปลงวันที่เลือกเป็นรูปแบบ dd/MM/yyyy เพื่อเอาไปเทียบกับ Log หลังบ้าน
-        const d = new Date(selectedDate);
-        const formattedTargetDate = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+    </main>
 
-        const container = document.getElementById('student-list');
-        container.innerHTML = '';
+    <script>
+        // 🔗 แทนที่ข้อความด้านล่างนี้ด้วย URL Web App ของคุณเองที่ได้จากขั้นตอนการ Deploy หลังบ้าน 
+        const WEB_APP_API = "https://script.google.com/macros/s/AKfycbyftmXqCv2YbMtPLyHR1ANdJaZ4zTCyNDDrY5shpg_AvwM_ZY7diIM__-a1m7a0xNig/exec";
 
-        const filtered = allStudents.filter(s => {
-            const matchSearch = s.nickname.toLowerCase().includes(searchKeyword) || s.phone.includes(searchKeyword);
-            const courseName = s.course.toLowerCase();
-            
-            // กรองตามภาควิชาที่เลือกในคอมโบ้บ็อกซ์ (กรองจากชื่อคอร์ส)
-            const matchDept = deptFilter === "" ? true : courseName.includes(deptFilter.toLowerCase());
-            
-            if (currentRole === 'live') { return matchSearch && matchDept && (courseName.includes('ติวสด') || courseName.includes('mix')); }
-            if (currentRole === 'online') { return matchSearch && matchDept && (courseName.includes('ออนไลน์') || courseName.includes('mix')); }
-            return false;
+        let studentDatabase = [];
+        let attendanceLogs = [];
+
+        // กำหนดตั้งค่าวันปัจจุบันแบบ Real-time
+        document.getElementById('attendanceDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('attendanceDate').addEventListener('change', () => {
+            renderDailyReport();
+            filterAndRender();
         });
 
-        if(filtered.length === 0 && currentRole !== '') {
-            container.innerHTML = '<p style="text-align:center; color:#999;">ไม่พบข้อมูลรายชื่อนักเรียน</p>';
-            return;
+        // ฟังก์ชันดึงข้อมูลเริ่มต้นจาก Google Sheets
+        async function fetchDataFromServer() {
+            showLoading(true);
+            try {
+                const response = await fetch(`${WEB_APP_API}?action=getInitialData`);
+                const result = await response.json();
+                studentDatabase = result.students || [];
+                attendanceLogs = result.logs || [];
+                
+                filterAndRender();
+                renderDailyReport();
+            } catch (error) {
+                alert("เกิดข้อผิดพลาดในการเชื่อมต่อสิทธิ์ความปลอดภัย: " + error);
+            } finally {
+                showLoading(false);
+            }
         }
 
-        filtered.forEach(s => {
-            const isBuffet = s.course.includes('Buffet');
-            const remainText = isBuffet ? 'คอร์สเหมา ไม่จำกัดครั้ง' : `เหลือ: ${s.remaining} ครั้ง`;
-            
-            // 🛡️ กฎเหล็ก: ค้นหาในประวัติ Log ว่า "เบอร์นี้ + วันนี้ + รูปแบบเรียนแบบนี้" มีการเช็คชื่อไปแล้วหรือยัง
-            const isAlreadyChecked = allLogs.some(log => {
-                return log.phone === s.phone && 
-                       log.date.split(' ')[0] === formattedTargetDate && 
-                       log.classType === (currentRole === 'live' ? 'ติวสด' : 'ออนไลน์');
-            });
+        // ประมวลผลและกระจายข้อมูลแสดงผลตามสิทธิ์และเงื่อนไขหน้างาน
+        function filterAndRender() {
+            const selectedDept = document.getElementById('deptSelector').value;
+            const container = document.getElementById('studentContainer');
+            container.innerHTML = '';
 
-            const card = document.createElement('div');
-            card.className = 'student-card';
-            
-            // โครงสร้างฝั่งข้อมูลแสดงผลคอลัมน์ A, B, C, K, L, M ตามสั่งเป๊ะครับ
-            let infoHTML = `
-                <div class="student-info">
-                    <p><b>น้อง ${s.nickname}</b> (โรงเรียน: ${s.school || '-'})</p>
-                    <p style="font-size:14px; color:#666;">📞 เบอร์โทร: ${s.phone} | 📦 คอร์ส: ${s.course}</p>
-                    <p style="font-size:14px; color: var(--primary); font-weight:bold;">⏱️ ${remainText} | 📅 หมดอายุ: ${s.expireDate || '-'}</p>
-                </div>
-            `;
-            
-            let actionHTML = '';
-            
-            if (isAlreadyChecked) {
-                // ถ้าเช็คซ้ำวันเดิม ให้ล็อคขึ้นสถานะทันที
-                actionHTML = `<div class="checked-badge">✓ เช็คชื่อแล้ว</div>`;
-            } else {
-                if (currentRole === 'live') {
-                    // แอดมินติวสด: ปุ่มเช็คชื่อแบบปกติ ส่งวิชาตามภาคที่กรอกหรือเลือกไว้
-                    const activeDept = deptFilter || "ติวสดทั่วไป";
-                    actionHTML = `<button class="checkin-btn" onclick="submitCheckIn('${s.phone}', '${activeDept}', 'ติวสด')">เช็คชื่อ</button>`;
+            if (!selectedDept) {
+                container.innerHTML = `
+                    <div class="col-span-full bg-white p-8 rounded-2xl text-center text-gray-400 border border-dashed border-gray-200">
+                        <i class="fa-solid fa-folder-open text-4xl mb-2"></i>
+                        <p>กรุณาเลือกภาควิชาเพื่อคัดกรองรายชื่อนักเรียนที่มีสถานะ Active</p>
+                    </div>`;
+                return;
+            }
+
+            // กรองภาควิชาตรงกัน (ข้อมูลต้นทางอยู่ในคอลัมน์ D)
+            const filteredList = studentDatabase.filter(s => s.dept === selectedDept);
+
+            if (filteredList.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full bg-white p-8 rounded-2xl text-center text-gray-400 border border-dashed border-gray-200">
+                        <i class="fa-solid fa-user-slash text-4xl mb-2"></i>
+                        <p>ไม่พบนักเรียนที่มีสถานะ Active ในภาควิชาที่เลือก</p>
+                    </div>`;
+                return;
+            }
+
+            const today = new Date();
+
+            filteredList.forEach(student => {
+                const card = document.createElement('div');
+                card.className = "bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between space-y-4 hover:shadow-md transition-shadow relative overflow-hidden";
+                
+                // ⚠️ คำนวณตรวจสอบระบบแจ้งเตือนโควตาเหลือ 0-2 ครั้ง
+                let warningBadge = "";
+                if (student.remaining !== "-" && student.remaining <= 2) {
+                    warningBadge += `<div class="bg-red-50 text-red-600 px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center border border-red-100"><i class="fa-solid fa-circle-exclamation mr-1.5 animate-pulse"></i> คอร์สใกล้หมด: เหลือ ${student.remaining} ครั้ง</div>`;
+                }
+
+                // ⚠️ คำนวณตรวจสอบระบบแจ้งเตือนวันหมดอายุคอร์สเรียนล่วงหน้า 7 วัน
+                if (student.expireDate) {
+                    const expDate = new Date(student.expireDate);
+                    const timeDiff = expDate.getTime() - today.getTime();
+                    const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+                    
+                    if (daysDiff >= 0 && daysDiff <= 7) {
+                        warningBadge += `<div class="bg-amber-50 text-amber-600 px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center border border-amber-100"><i class="fa-solid fa-hourglass-half mr-1.5 animate-pulse"></i> คอร์สกำลังจะหมดอายุในอีก ${daysDiff} วัน</div>`;
+                    } else if (daysDiff < 0) {
+                        warningBadge += `<div class="bg-red-100 text-red-700 px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center"><i class="fa-solid fa-calendar-xmark mr-1.5"></i> คอร์สหมดอายุแล้ว</div>`;
+                    }
+                }
+
+                // วิเคราะห์เงื่อนไขการสร้างปุ่มเลือกสลับคอร์สเรียน (เหมา/Mix/ติวสด/ออนไลน์)
+                const courseText = student.course;
+                let actionButtonsHTML = `<div class="flex flex-col gap-2 w-full">`;
+
+                if (courseText.includes("เหมา") || courseText.includes("Mix")) {
+                    actionButtonsHTML += `
+                        <button onclick="executeCheckin('${student.nickname}', '${student.school}', '${student.phone}', '${selectedDept}', 'ติวสด')" class="w-full theme-green text-white py-2.5 rounded-xl font-medium hover:opacity-90 transition text-sm"><i class="fa-solid fa-users mr-1"></i> บันทึก: ติวสด</button>
+                        <button onclick="executeCheckin('${student.nickname}', '${student.school}', '${student.phone}', '${selectedDept}', 'ออนไลน์')" class="w-full bg-blue-600 text-white py-2.5 rounded-xl font-medium hover:opacity-90 transition text-sm"><i class="fa-solid fa-desktop mr-1"></i> บันทึก: ออนไลน์วิชาภาค</button>
+                        <button onclick="executeCheckin('${student.nickname}', '${student.school}', '${student.phone}', 'วาดเส้น', 'ออนไลน์')" class="w-full bg-indigo-600 text-white py-2.5 rounded-xl font-medium hover:opacity-90 transition text-sm"><i class="fa-solid fa-pen-nib mr-1"></i> บันทึก: ออนไลน์วาดเส้น</button>
+                    `;
+                } else if (courseText.includes("ติวสด")) {
+                    actionButtonsHTML += `
+                        <button onclick="executeCheckin('${student.nickname}', '${student.school}', '${student.phone}', '${selectedDept}', 'ติวสด')" class="w-full theme-green text-white py-2.5 rounded-xl font-medium hover:opacity-90 transition text-sm"><i class="fa-solid fa-users mr-1"></i> บันทึก: ติวสด</button>
+                    `;
+                } else if (courseText.includes("ออนไลน์")) {
+                    actionButtonsHTML += `
+                        <button onclick="executeCheckin('${student.nickname}', '${student.school}', '${student.phone}', '${selectedDept}', 'ออนไลน์')" class="w-full bg-blue-600 text-white py-2.5 rounded-xl font-medium hover:opacity-90 transition text-sm"><i class="fa-solid fa-desktop mr-1"></i> บันทึก: ออนไลน์วิชาภาค</button>
+                        <button onclick="executeCheckin('${student.nickname}', '${student.school}', '${student.phone}', 'วาดเส้น', 'ออนไลน์')" class="w-full bg-indigo-600 text-white py-2.5 rounded-xl font-medium hover:opacity-90 transition text-sm"><i class="fa-solid fa-pen-nib mr-1"></i> บันทึก: ออนไลน์วาดเส้น</button>
+                    `;
                 } else {
-                    // แอดมินออนไลน์: แยกปุ่ม "ออนไลน์วิชาภาค" และ "ออนไลน์วาดเส้น" ให้กดเลือกหน้างานทันที 🎯
-                    actionHTML = `
-                        <div class="online-btn-group">
-                            <button class="btn-sub" style="background:#2563eb;" onclick="submitCheckIn('${s.phone}', 'ออนไลน์วิชาภาค', 'ออนไลน์')">🖥️ ออนไลน์วิชาภาค</button>
-                            <button class="btn-sub" style="background:#4f46e5;" onclick="submitCheckIn('${s.phone}', 'ออนไลน์วาดเส้น', 'ออนไลน์')">✏️ ออนไลน์วาดเส้น</button>
-                        </div>
+                    // แผนสำรองกรณีชื่อคอร์สทั่วไปไม่มีคีย์เวิร์ด
+                    actionButtonsHTML += `
+                        <button onclick="executeCheckin('${student.nickname}', '${student.school}', '${student.phone}', '${selectedDept}', 'ติวสด')" class="w-full theme-green text-white py-2.5 rounded-xl font-medium hover:opacity-90 transition text-sm">เช็คชื่อเข้าเรียน</button>
                     `;
                 }
-            }
+                actionButtonsHTML += `</div>`;
 
-            card.innerHTML = infoHTML + actionHTML;
-            container.appendChild(card);
-        });
-    }
-
-    async function submitCheckIn(phone, subject, classType) {
-        const selectedDate = document.getElementById('checkInDate').value;
-        if (!selectedDate) return alert("กรุณาเลือกวันที่ก่อนบันทึกครับ");
-
-        document.getElementById('loading').style.display = 'block';
-        try {
-            const response = await fetch(API_URL, {
-                method: "POST",
-                headers: { "Content-Type": "text/plain" },
-                body: JSON.stringify({ 
-                    action: "checkIn", 
-                    phone: phone, 
-                    subject: subject, 
-                    classType: classType,
-                    customDate: selectedDate // ส่งค่าวันที่ที่แอดมินเลือก (เผื่อเช็คย้อนหลัง) ไปให้ระบบหลังบ้าน
-                })
+                card.innerHTML = `
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-start">
+                            <h4 class="text-lg font-bold text-gray-800">น้อง ${student.nickname} <span class="text-sm font-normal text-gray-500">(${student.school || 'ไม่ระบุ รร.'})</span></h4>
+                        </div>
+                        <p class="text-xs text-gray-500"><i class="fa-solid fa-phone mr-1"></i> เบอร์โทร: ${student.phone}</p>
+                        <p class="text-xs text-gray-600 bg-gray-50 p-2 rounded-lg border border-gray-100">📦 คอร์ส: ${student.course}</p>
+                        <div class="text-xs grid grid-cols-2 gap-1 text-gray-500">
+                            <div><i class="fa-solid fa-calculator mr-1"></i> คงเหลือ: <span class="font-semibold text-blue-600">${student.remaining} ครั้ง</span></div>
+                            <div><i class="fa-solid fa-hourglass-end mr-1"></i> หมดอายุ: <span class="font-semibold text-gray-700">${student.expireDate || '-'}</span></div>
+                        </div>
+                        <div class="flex flex-col gap-1.5 pt-1">${warningBadge}</div>
+                    </div>
+                    <div class="pt-3 border-t border-gray-50 flex items-center justify-between">${actionButtonsHTML}</div>
+                `;
+                container.appendChild(card);
             });
-            const result = await response.json();
-            if (result.status === "success") { 
-                alert("🎉 บันทึกสำเร็จ!"); 
-                fetchData(); // รีเฟรชฐานข้อมูลและเช็กสถานะซ้ำซ้อนทันที
+        }
+
+        // บันทึกประวัติการเช็คอินส่งข้อมูลตรงไปยังชุดฐานข้อมูลกลางหลังบ้าน
+        async function executeCheckin(name, school, phone, subject, type) {
+            const dateVal = document.getElementById('attendanceDate').value;
+            if (!dateVal) return alert("กรุณาตรวจสอบการกำหนดระบุวันที่ก่อนทำรายการ");
+
+            showLoading(true);
+            try {
+                const response = await fetch(WEB_APP_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({
+                        action: "checkIn",
+                        date: dateVal,
+                        name: name,
+                        school: school,
+                        phone: phone,
+                        subject: subject,
+                        type: type
+                    })
+                });
+                const result = await response.json();
+                
+                if (result.status === "success") {
+                    alert(`🎉 บันทึกข้อมูลของ "น้อง ${name}" เรียบร้อยแล้ว!`);
+                    fetchDataFromServer(); // อัปเดตตารางและตรวจสอบระบบซ้ำทันที
+                } else if (result.status === "duplicate") {
+                    alert(`🚫 ปฏิเสธทำรายการ: ${result.message}`);
+                }
+            } catch (error) {
+                alert("การส่งข้อมูลทำงานไม่สำเร็จ: " + error);
+            } finally {
+                showLoading(false);
             }
-        } catch (error) { alert("บันทึกล้มเหลว"); }
-        document.getElementById('loading').style.display = 'none';
-    }
-</script>
+        }
+
+        // จัดการลอจิกสตรีมมิ่งประวัติของรายงานประจำวันประจำวันตามที่แอดมินเลือก
+        function renderDailyReport() {
+            const targetDate = document.getElementById('attendanceDate').value;
+            const tbody = document.getElementById('reportTableBody');
+            tbody.innerHTML = '';
+
+            const matchedLogs = attendanceLogs.filter(log => log.date === targetDate);
+
+            if (matchedLogs.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="p-8 text-center text-gray-400">ไม่มีข้อมูลการลงชื่อเรียนที่ตรงกับวันที่ระบุในระบบย้อนหลัง</td>
+                    </tr>`;
+                return;
+            }
+
+            matchedLogs.forEach(log => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-50 transition-colors";
+                
+                let badgeStyle = log.type === "ติวสด" ? "bg-green-100 text-green-800" : "bg-blue-100 text-blue-800";
+                
+                tr.innerHTML = `
+                    <td class="p-4 font-semibold text-gray-800">น้อง ${log.name}</td>
+                    <td class="p-4 text-gray-500">${log.school || '-'}</td>
+                    <td class="p-4 text-gray-600">${log.phone}</td>
+                    <td class="p-4"><span class="bg-gray-100 text-gray-700 px-2.5 py-1 rounded-md font-medium text-xs border border-gray-200">${log.subject}</span></td>
+                    <td class="p-4"><span class="${badgeStyle} px-2.5 py-1 rounded-full text-xs font-bold"><i class="${log.type === "ติวสด" ? "fa-solid fa-users" : "fa-solid fa-desktop"} mr-1"></i>${log.type}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // ควบคุมแท็บหน้าต่างแสดงผล
+        function switchTab(tab) {
+            const checkinBtn = document.getElementById('tabCheckinBtn');
+            const reportBtn = document.getElementById('tabReportBtn');
+            const checkinPage = document.getElementById('checkinPage');
+            const reportPage = document.getElementById('reportPage');
+
+            if (tab === 'checkin') {
+                checkinBtn.className = "flex-1 py-3 text-center rounded-lg font-semibold transition-all duration-200 theme-blue text-white shadow-sm";
+                reportBtn.className = "flex-1 py-3 text-center rounded-lg font-semibold transition-all duration-200 text-gray-600 hover:bg-gray-50";
+                checkinPage.classList.remove('hidden');
+                reportPage.classList.add('hidden');
+            } else {
+                reportBtn.className = "flex-1 py-3 text-center rounded-lg font-semibold transition-all duration-200 theme-blue text-white shadow-sm";
+                checkinBtn.className = "flex-1 py-3 text-center rounded-lg font-semibold transition-all duration-200 text-gray-600 hover:bg-gray-50";
+                reportPage.classList.remove('hidden');
+                checkinPage.classList.add('hidden');
+                renderDailyReport();
+            }
+        }
+
+        function showLoading(isLoading) {
+            document.getElementById('loadingOverlay').classList.toggle('hidden', !isLoading);
+        }
+
+        // เรียกดึงข้อมูลชุดแรกขึ้นระบบทันทีเมื่อโหลดหน้าเว็บเรียบร้อย
+        window.onload = fetchDataFromServer;
+    </script>
 </body>
 </html>
