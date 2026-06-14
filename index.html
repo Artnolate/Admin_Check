@@ -242,6 +242,7 @@ a{color:var(--accent)}
 /* ─────────────────────────────────────────
    CONFIG
 ───────────────────────────────────────── */
+// นำ URL Web App ของคุณมาใส่ตรงนี้
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbyftmXqCv2YbMtPLyHR1ANdJaZ4zTCyNDDrY5shpg_AvwM_ZY7diIM__-a1m7a0xNig/exec';
 
 /* ─────────────────────────────────────────
@@ -268,7 +269,8 @@ window.addEventListener('DOMContentLoaded', () => {
 ───────────────────────────────────────── */
 function gasCall(params) {
   const qs = new URLSearchParams(params).toString();
-  return fetch(`${GAS_URL}?${qs}`).then(r => r.json());
+  return fetch(`${GAS_URL}?${qs}`)
+    .then(r => r.json());
 }
 function gasPost(body) {
   return fetch(GAS_URL, {
@@ -299,7 +301,7 @@ async function fetchStudents() {
    FETCH LOG for date
 ───────────────────────────────────────── */
 async function fetchLog(date) {
-  if (logDate === date) return logCache;  // cache hit
+  if (logDate === date) return logCache;  
   try {
     const data = await gasCall({ action: 'getLog', date });
     logCache = data.rows || [];
@@ -330,7 +332,7 @@ async function renderAttendance() {
     return;
   }
 
-  // filter
+  // ── filter ──
   let list = students.filter(s => {
     const dm = s.dept && s.dept.includes(dept);
     const qm = q ? (s.nickname+s.fullname+s.school).toLowerCase().includes(q) : true;
@@ -343,16 +345,14 @@ async function renderAttendance() {
     return;
   }
 
-  // ดึง Log เพื่อตรวจสอบสถานะปุ่ม
+  // ── sync log from sheet for this date (ดักซ้ำด้วย normPhone) ──
   const logRows = await fetchLog(date);
   const serverChecked = new Set();
   logRows.forEach(r => {
-    if (r.phone && r.type) {
-      // ใช้ normPhone ตัดเลข 0 ข้างหน้าออกเพื่อใช้ตรวจจับคู่ป้องกันบั๊กเบอร์เพี้ยนข้ามเครื่อง
-      serverChecked.add(`${normPhone(r.phone)}__${r.type}`);
-    }
+    if (r.phone && r.type) serverChecked.add(`${normPhone(r.phone)}__${r.type}`);
   });
 
+  // ── today alerts ──
   const today   = new Date(date);
   const warn7   = new Date(date); warn7.setDate(warn7.getDate() + 7);
 
@@ -396,7 +396,7 @@ async function renderAttendance() {
         <span class="badge badge-c">${esc(s.courseRaw)}</span>
         ${!isMao?`<span class="mi"><span class="mi-ico">🔢</span>เหลือ ${esc(String(showRem))} ครั้ง</span>`:''}
         ${s.expiry?`<span class="mi"><span class="mi-ico">📆</span>${fmtDate(s.expiry)}</span>`:''}
-        ${s.round?`<span class="mi"><span class="mi-ico">⏰</span>รอบที่ ${esc(s.round)}</span>`:''}
+        ${s.round?`<span class="mi"><span class="mi-ico">⏰</span>รอบคอร์สที่ ${esc(s.round)}</span>`:''}
       </div>
       ${alerts?`<div class="alerts">${alerts}</div>`:''}
     </div>
@@ -409,6 +409,7 @@ async function renderAttendance() {
 
   showList(cards.join(''));
 
+  // chips
   chips.style.display = 'flex';
   document.getElementById('chip-total').textContent   = `👥 ${list.length} คน`;
   document.getElementById('chip-checked').textContent  = `✅ เช็คแล้ว ${checkedCount}`;
@@ -432,11 +433,10 @@ function buildBtns(s, date, serverChecked) {
   } else if (hasOnl) {
     types = ['ออนไลน์วิชาภาค','ออนไลน์วาดเส้น'];
   } else {
-    types = ['ติวสด'];
+    types = ['ติวสด']; 
   }
 
   return types.map(t => {
-    // ตรวจสอบค่าซ้ำโดยอิงจากเซ็ตโมเดลสากล (ตัด 0 ออกชั่วคราวเพื่อความเข้ากันได้)
     const done = serverChecked.has(`${normPhone(s.phone)}__${t}`) || isCheckedLocal(s.phone, date, t);
     return { type: t, label: typeLabel(t, s.dept), done };
   });
@@ -448,6 +448,7 @@ function typeLabel(type, dept) {
   if (type === 'ออนไลน์วิชาภาค') return `📚 ${deptSubject(dept)}`;
   return type;
 }
+
 function deptSubject(dept) {
   const map = {
     'ศิลปกรรม':'วิชาศิลปกรรม','สถาปัตยกรรม':'วิชาสถาปัตย์',
@@ -462,14 +463,15 @@ function deptSubject(dept) {
 
 function renderCBtn(b, s, date) {
   if (b.done) return `<button class="cbtn done">${b.label} ✓</button>`;
-  const onclick = `doCheck(this,'${esc(s.phone)}','${esc(s.nickname)}','${esc(s.school)}','${esc(s.round)}','${b.type}','${esc(b.label)}','${date}')`;
+  // อัปเดตข้อมูลส่งไป Backend ให้ตรงกับ 7 คอลัมน์ (date, phone, nickname, school, dept, round, type)
+  const onclick = `doCheck(this,'${esc(s.phone)}','${esc(s.nickname)}','${esc(s.school)}','${esc(s.dept)}','${esc(s.round)}','${b.type}','${esc(b.label)}','${date}')`;
   return `<button class="cbtn" onclick="${onclick}">${b.label}</button>`;
 }
 
 /* ─────────────────────────────────────────
    DO CHECK
 ───────────────────────────────────────── */
-async function doCheck(btnEl, phone, nickname, school, round, type, label, date) {
+async function doCheck(btnEl, phone, nickname, school, dept, round, type, label, date) {
   if (btnEl.classList.contains('saving') || btnEl.classList.contains('done')) return;
   btnEl.classList.add('saving');
   btnEl.textContent = '⏳…';
@@ -477,12 +479,12 @@ async function doCheck(btnEl, phone, nickname, school, round, type, label, date)
   try {
     const resp = await gasPost({
       action: 'addLog',
-      date, phone, nickname, school, round, type
+      date, phone, nickname, school, dept, round, type
     });
     if (resp && resp.error) throw new Error(resp.error);
 
     markLocal(phone, date, type);
-    logCache.push({ date, phone, nickname, school, round, type });
+    logCache.push({ date, phone, nickname, school, dept, round, type });
 
     btnEl.classList.remove('saving');
     btnEl.classList.add('done');
@@ -511,18 +513,18 @@ function updateChips() {
 }
 
 /* ─────────────────────────────────────────
-   RENDER REPORT (กรองประวัติจากชีตตรงตามวันที่เลือก)
+   RENDER REPORT
 ───────────────────────────────────────── */
 async function renderReport() {
-  const date = document.getElementById('rep-date').value; // ค่าคือ "YYYY-MM-DD"
+  const date = document.getElementById('rep-date').value;
   const box  = document.getElementById('rep-content');
   box.innerHTML = `<div class="state"><div class="spinner"></div><p>กำลังโหลด…</p></div>`;
 
   try {
     const data = await gasCall({ action: 'getLog', date });
     const allRows = data.rows || [];
-    
-    // กรองประวัติจาก Attendance_Log ดึงเฉพาะแถวที่มีวันที่ตรงกันแบบเป๊ะๆ
+
+    // กรองประวัติรายวันให้แสดงเฉพาะวันที่ตรงกันเป๊ะๆ
     const rows = allRows.filter(r => isSameDate(r.date, date));
 
     if (!rows.length) {
@@ -536,6 +538,7 @@ async function renderReport() {
   <td><strong>${esc(r.nickname||'')}</strong></td>
   <td style="font-size:13px;color:var(--txt2)">${esc(r.school||'-')}</td>
   <td>${esc(r.phone||'')}</td>
+  <td style="font-size:13px;color:var(--txt2)">${esc(r.dept||'-')}</td>
   <td style="color:var(--txt3);font-size:13px">${esc(r.round||'-')}</td>
   <td><span class="pill ${pillClass(r.type)}">${esc(r.type||'')}</span></td>
 </tr>`).join('');
@@ -543,7 +546,7 @@ async function renderReport() {
     box.innerHTML = `
 <div class="chips"><div class="chip chip-b">📋 ${fmtDateISO(date)} — ${rows.length} รายการ</div></div>
 <table class="rtable">
-  <thead><tr><th>#</th><th>ชื่อ</th><th>โรงเรียน</th><th>เบอร์โทร</th><th>รอบ</th><th>รูปแบบ</th></tr></thead>
+  <thead><tr><th>#</th><th>ชื่อเล่น</th><th>โรงเรียน</th><th>เบอร์โทรศัพท์</th><th>ภาควิชา</th><th>รอบ</th><th>รูปแบบ</th></tr></thead>
   <tbody>${tbody}</tbody>
 </table>`;
   } catch(e) {
@@ -573,35 +576,15 @@ function isCheckedLocal(ph, dt, tp) { return !!checked[lcKey(ph,dt,tp)]; }
 ───────────────────────────────────────── */
 function todayISO() { return new Date().toISOString().slice(0,10); }
 
+// ฟังก์ชันแปลงเบอร์โทร: ตัดอักขระที่ไม่ใช่ตัวเลขออก และตัด '0' ข้างหน้าออกเพื่อความแม่นยำตอนเทียบ
 function normPhone(p) {
-  // ฟังก์ชันสากลแปลงค่าเบอร์โทรเพื่อใช้เช็คคู่เปรียบเทียบ โดยไม่แคร์เลข 0 ด้านหน้า
   return String(p || '').replace(/[^0-9]/g, '').replace(/^0+/, '');
 }
 
+// ฟังก์ชันตรวจเช็ควันที่ให้แม่นยำ
 function isSameDate(logDateStr, targetIso) {
   if (!logDateStr || !targetIso) return false;
-  
-  // แปลงค่าเปรียบเทียบระหว่างวันที่จาก Google Sheets กับ วันที่จาก Input (YYYY-MM-DD)
-  const d1 = new Date(logDateStr);
-  const d2 = new Date(targetIso);
-  if (!isNaN(d1) && !isNaN(d2)) {
-    return d1.getFullYear() === d2.getFullYear() &&
-           d1.getMonth() === d2.getMonth() &&
-           d1.getDate() === d2.getDate();
-  }
-  
-  // กรณีสเปรดชีตส่งมาเป็น Text Format (เช่น "14/6/2026")
-  const cleanLog = logDateStr.split(',')[0].trim();
-  const parts = cleanLog.split('/');
-  const tgtParts = targetIso.split('-');
-  if (parts.length === 3 && tgtParts.length === 3) {
-    let logYear = parseInt(parts[2]);
-    if (logYear > 2500) logYear -= 543; // แปลง พ.ศ. เป็น ค.ศ. (ถ้ามี)
-    return parseInt(parts[0]) === parseInt(tgtParts[2]) &&
-           parseInt(parts[1]) === parseInt(tgtParts[1]) &&
-           logYear === parseInt(tgtParts[0]);
-  }
-  return logDateStr.includes(targetIso);
+  return logDateStr.includes(targetIso) || targetIso.includes(logDateStr);
 }
 
 function parseDateAny(str) {
