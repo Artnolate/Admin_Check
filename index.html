@@ -745,37 +745,37 @@ function buildCard(s) {
 // CHECK IN
 // ============================================================
 async function doCheckIn(btn, sid, mode) {
-  let s;
-  try { s = JSON.parse(decodeURIComponent(sid)); }
-  catch { toast('ข้อมูลผิดพลาด','err'); return; }
-
-  // ปิดปุ่มทันที (ป้องกัน double click)
-  btn.disabled = true;
-  btn.classList.add('locked-btn');
-
+  let s = JSON.parse(decodeURIComponent(sid));
   showLoad(true);
+
+  // ตรวจสอบว่า GAS_URL เป็น URL ที่ Deploy แบบ 'Anyone' แล้ว
+  const GAS_URL = '...ใส่ URL ของ Web App ของคุณที่นี่...';
+
   try {
-    const res = await callGAS('saveAttendance', {
-      dateStr:  currentDate,
-      nickname: s.nickname,
-      school:   s.school,
-      phone:    s.phone,
-      dept:     s.dept,
-      period:   s.period,
-      mode:     mode
+    const response = await fetch(GAS_URL, {
+      method: 'POST', // ต้องเป็น POST
+      body: JSON.stringify({
+        action: 'saveAttendance',
+        data: {
+          dateStr: currentDate,
+          nickname: s.nickname,
+          school: s.school,
+          phone: s.phone,
+          dept: s.dept,
+          period: s.period,
+          mode: mode
+        }
+      })
     });
-    if (!res || !res.success) throw new Error(res ? res.error : 'บันทึกไม่สำเร็จ');
-
-    // อัปเดต state ทันที
-    if (!checkedMap[s.phone]) checkedMap[s.phone] = [];
-    checkedMap[s.phone].push(mode);
-
-    renderList();
-    toast(`✅ เช็คชื่อ ${s.nickname} (${mode}) สำเร็จ`, 'ok');
+    
+    const res = await response.json();
+    if (res.success) {
+      toast(`✅ บันทึกของ ${s.nickname} เรียบร้อยแล้ว`, 'ok');
+      renderList(); // รีเฟรชหน้าจอใหม่
+    } else {
+      throw new Error(res.error);
+    }
   } catch(e) {
-    // คืนปุ่มถ้า error
-    btn.disabled = false;
-    btn.classList.remove('locked-btn');
     toast('บันทึกไม่สำเร็จ: ' + e.message, 'err');
   } finally {
     showLoad(false);
