@@ -523,26 +523,23 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbwy0jjqNph0MGvyUfcmtydS
 
 async function callGAS(fn, ...args) {
   const url = new URL(GAS_URL);
-  url.searchParams.append('action', fn);
   
-  const options = {
-    method: 'GET',
-    mode: 'cors' // สำคัญมาก
-  };
-
-  // ถ้าเป็นฟังก์ชัน saveAttendance ให้ใช้ POST
   if (fn === 'saveAttendance') {
-    options.method = 'POST';
-    options.body = JSON.stringify(args[0]);
+    // สำหรับการบันทึก ต้องใช้ POST
+    const response = await fetch(GAS_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'saveAttendance', data: args[0] })
+    });
+    return await response.json();
   } else {
-    // เพิ่ม parameter สำหรับ function อื่นๆ
+    // สำหรับการดึงข้อมูล ใช้ GET (เพิ่ม action ลงใน URL)
+    url.searchParams.append('action', fn);
     if (args[0]) url.searchParams.append('dateStr', args[0]);
+    
+    const response = await fetch(url, { method: 'GET' });
+    return await response.json();
   }
-
-  const response = await fetch(url, options);
-  return await response.json();
 }
-
 
 
 // ============================================================
