@@ -6,34 +6,33 @@
   <title>ระบบเช็คชื่อ - ARTNOLATE</title>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
-    /* ============================================================
-       RESET & BASE
-    ============================================================ */
+    /* ===== RESET ===== */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --navy:    #1C2951;
-      --navy-90: #1C2951e6;
-      --navy-20: #1C295133;
-      --orange:  #FF8C00;
-      --orange-light: #FFA533;
-      --orange-bg:    #FFF4E0;
-      --white:   #FFFFFF;
-      --gray-50: #F8F9FB;
-      --gray-100:#EEF0F5;
-      --gray-200:#D8DCE8;
-      --gray-400:#9099B0;
-      --gray-600:#5A6278;
-      --gray-800:#2D3448;
-      --green:   #22C55E;
-      --red:     #EF4444;
-      --yellow:  #F59E0B;
-      --locked:  #B0B7C8;
-      --font:    'Sarabun', sans-serif;
-      --radius:  10px;
-      --radius-sm: 6px;
-      --shadow:  0 2px 12px rgba(28,41,81,0.10);
-      --shadow-md: 0 4px 20px rgba(28,41,81,0.14);
+      --navy:       #1C2951;
+      --navy-dark:  #141e3d;
+      --navy-20:    rgba(28,41,81,0.12);
+      --orange:     #FF8C00;
+      --orange-bg:  #FFF4E0;
+      --white:      #FFFFFF;
+      --gray-50:    #F7F8FB;
+      --gray-100:   #ECEEF5;
+      --gray-200:   #D5D9E8;
+      --gray-400:   #8C95AE;
+      --gray-600:   #545D78;
+      --gray-800:   #2A3248;
+      --green:      #16A34A;
+      --red:        #DC2626;
+      --yellow:     #D97706;
+      --purple:     #7C3AED;
+      --locked-bg:  #F1F3F8;
+      --locked-col: #9CA3B8;
+      --font:       'Sarabun', sans-serif;
+      --r:          10px;
+      --r-sm:       6px;
+      --sh:         0 1px 8px rgba(28,41,81,0.09);
+      --sh-md:      0 4px 20px rgba(28,41,81,0.13);
     }
 
     body {
@@ -41,610 +40,421 @@
       background: var(--gray-50);
       color: var(--gray-800);
       font-size: 15px;
-      line-height: 1.6;
+      line-height: 1.55;
       min-height: 100vh;
     }
 
-    /* ============================================================
-       LAYOUT
-    ============================================================ */
-    .app-wrapper { max-width: 900px; margin: 0 auto; padding: 0 0 60px; }
+    .app-wrapper { max-width: 940px; margin: 0 auto; padding-bottom: 72px; }
 
-    /* ============================================================
-       STICKY HEADER
-    ============================================================ */
+    /* ===== STICKY HEADER ===== */
     .app-header {
       background: var(--navy);
-      padding: 18px 24px 0;
+      padding: 16px 24px 0;
       position: sticky;
       top: 0;
-      z-index: 100;
-      box-shadow: 0 2px 16px rgba(28,41,81,0.22);
+      z-index: 200;
+      box-shadow: 0 2px 20px rgba(28,41,81,0.28);
     }
-
     .header-brand {
       display: flex;
-      align-items: baseline;
+      align-items: center;
       gap: 10px;
     }
-
-    .header-brand .title-main {
-      font-size: 22px;
-      font-weight: 700;
-      color: var(--white);
-      letter-spacing: 0.01em;
+    .brand-icon {
+      width: 36px; height: 36px;
+      background: var(--orange);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
     }
+    .brand-text { display: flex; flex-direction: column; line-height: 1.15; }
+    .brand-text .t1 { font-size: 18px; font-weight: 700; color: var(--white); }
+    .brand-text .t2 { font-size: 10px; font-weight: 600; color: var(--orange); letter-spacing: 0.14em; text-transform: uppercase; }
 
-    .header-brand .title-sub {
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--orange);
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-    }
-
-    /* Tab Navigation */
-    .tab-nav {
-      display: flex;
-      gap: 4px;
-      margin-top: 14px;
-    }
-
+    /* Tab bar */
+    .tab-nav { display: flex; gap: 2px; margin-top: 14px; }
     .tab-btn {
       padding: 10px 22px;
-      border: none;
-      background: transparent;
-      color: rgba(255,255,255,0.55);
-      font-family: var(--font);
-      font-size: 14px;
-      font-weight: 500;
+      border: none; background: transparent;
+      color: rgba(255,255,255,0.5);
+      font-family: var(--font); font-size: 14px; font-weight: 500;
       cursor: pointer;
       border-bottom: 3px solid transparent;
-      transition: all 0.2s;
-      border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+      border-radius: var(--r-sm) var(--r-sm) 0 0;
+      transition: all .18s;
     }
+    .tab-btn:hover { color: rgba(255,255,255,0.82); }
+    .tab-btn.active { color: var(--white); border-bottom-color: var(--orange); background: rgba(255,255,255,0.08); }
 
-    .tab-btn:hover { color: rgba(255,255,255,0.85); }
-
-    .tab-btn.active {
-      color: var(--white);
-      border-bottom-color: var(--orange);
-      background: rgba(255,255,255,0.08);
-    }
-
-    .tab-btn .tab-icon { margin-right: 6px; }
-
-    /* ============================================================
-       FILTER BAR (sticky below header)
-    ============================================================ */
+    /* ===== FILTER BAR ===== */
     .filter-bar {
       background: var(--white);
-      padding: 14px 20px;
+      padding: 12px 20px;
       border-bottom: 1px solid var(--gray-100);
       position: sticky;
-      top: 90px;
-      z-index: 90;
-      box-shadow: 0 2px 8px rgba(28,41,81,0.07);
+      top: 88px;
+      z-index: 100;
+      box-shadow: 0 2px 10px rgba(28,41,81,0.07);
     }
-
-    .filter-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .filter-group {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .filter-label {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--navy);
-      white-space: nowrap;
-    }
-
-    .filter-label svg { vertical-align: -2px; margin-right: 4px; }
+    .filter-row { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; }
+    .filter-group { display: flex; align-items: center; gap: 7px; }
+    .filter-label { font-size: 12.5px; font-weight: 700; color: var(--navy); white-space: nowrap; display: flex; align-items: center; gap: 4px; }
 
     .form-control {
-      font-family: var(--font);
-      font-size: 14px;
-      color: var(--gray-800);
-      background: var(--gray-50);
-      border: 1.5px solid var(--gray-200);
-      border-radius: var(--radius-sm);
-      padding: 7px 12px;
-      transition: border-color 0.2s;
-      outline: none;
+      font-family: var(--font); font-size: 13.5px; color: var(--gray-800);
+      background: var(--gray-50); border: 1.5px solid var(--gray-200);
+      border-radius: var(--r-sm); padding: 6px 11px;
+      transition: border-color .18s; outline: none;
     }
+    .form-control:focus { border-color: var(--navy); background: var(--white); }
+    select.form-control {
+      padding-right: 26px; appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7' viewBox='0 0 11 7'%3E%3Cpath d='M1 1l4.5 4.5L10 1' stroke='%231C2951' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 9px center;
+    }
+    input[type="date"].form-control { min-width: 155px; }
 
-    .form-control:focus { border-color: var(--navy); }
-
-    select.form-control { padding-right: 28px; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%231C2951' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; }
-
-    input[type="date"].form-control { min-width: 160px; }
-
-    /* Mode toggle pills */
-    .mode-pills { display: flex; gap: 6px; }
-
+    /* Mode pills */
+    .mode-pills { display: flex; gap: 5px; }
     .pill-btn {
-      padding: 6px 18px;
-      border-radius: 20px;
+      padding: 5px 16px; border-radius: 20px;
       border: 1.5px solid var(--gray-200);
-      background: var(--white);
-      color: var(--gray-600);
-      font-family: var(--font);
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.18s;
+      background: var(--white); color: var(--gray-600);
+      font-family: var(--font); font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: all .18s;
     }
-
     .pill-btn:hover { border-color: var(--orange); color: var(--orange); }
+    .pill-btn.active { background: var(--orange); border-color: var(--orange); color: var(--white); font-weight: 700; }
 
-    .pill-btn.active {
-      background: var(--orange);
-      border-color: var(--orange);
-      color: var(--white);
-      font-weight: 600;
-    }
-
-    /* Summary strip */
+    /* ===== SUMMARY STRIP ===== */
     .summary-strip {
-      display: flex;
-      gap: 10px;
-      padding: 8px 20px;
       background: var(--navy-20);
-      align-items: center;
-      flex-wrap: wrap;
+      padding: 7px 20px;
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      border-bottom: 1px solid var(--gray-200);
     }
-
-    .summary-chip {
-      background: var(--white);
-      border: 1.5px solid var(--gray-200);
-      border-radius: 16px;
-      padding: 4px 14px;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--navy);
-      display: flex;
-      align-items: center;
-      gap: 5px;
+    .sum-label { font-size: 12.5px; font-weight: 700; color: var(--navy); }
+    .chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--white); border: 1.5px solid var(--gray-200);
+      border-radius: 14px; padding: 3px 12px;
+      font-size: 12.5px; font-weight: 500; color: var(--navy);
     }
-
-    .summary-chip .chip-count {
-      background: var(--navy);
-      color: var(--white);
-      border-radius: 10px;
-      padding: 0 8px;
-      font-size: 12px;
-      font-weight: 700;
+    .chip .num {
+      background: var(--navy); color: var(--white);
+      border-radius: 10px; padding: 0 7px;
+      font-size: 12px; font-weight: 700;
     }
+    .chip.org .num { background: var(--orange); }
+    .chip.grn .num { background: var(--green); }
 
-    .summary-chip.orange .chip-count { background: var(--orange); }
-
-    /* ============================================================
-       STUDENT LIST
-    ============================================================ */
-    .section-content { padding: 16px 20px; }
-
-    .student-list { display: flex; flex-direction: column; gap: 10px; }
+    /* ===== STUDENT LIST ===== */
+    .section-body { padding: 14px 18px; }
+    .student-list { display: flex; flex-direction: column; gap: 9px; }
 
     .student-card {
       background: var(--white);
       border: 1.5px solid var(--gray-100);
-      border-radius: var(--radius);
-      padding: 14px 16px;
-      display: flex;
-      align-items: flex-start;
-      gap: 14px;
-      box-shadow: var(--shadow);
-      transition: box-shadow 0.2s, border-color 0.2s;
+      border-radius: var(--r);
+      padding: 13px 15px;
+      display: flex; align-items: flex-start; gap: 13px;
+      box-shadow: var(--sh);
+      transition: box-shadow .18s, border-color .18s;
       position: relative;
     }
-
-    .student-card:hover { box-shadow: var(--shadow-md); border-color: var(--gray-200); }
-
-    .student-card.locked {
-      background: var(--gray-50);
-      border-color: var(--gray-100);
-      opacity: 0.72;
-    }
+    .student-card:hover { box-shadow: var(--sh-md); border-color: var(--gray-200); }
+    .student-card.all-locked { background: var(--locked-bg); }
 
     /* Avatar */
-    .student-avatar {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--navy) 0%, #2E4A8A 100%);
+    .avatar {
+      width: 42px; height: 42px; border-radius: 50%;
+      background: linear-gradient(135deg,var(--navy) 0%,#2E4B90 100%);
       color: var(--white);
-      font-size: 17px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      font-size: 16px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
     }
 
     /* Card body */
-    .student-body { flex: 1; min-width: 0; }
-
-    .student-name-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .student-nickname {
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--navy);
-    }
-
-    .student-fullname {
-      font-size: 13px;
-      color: var(--gray-600);
-    }
-
-    .student-meta {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 5px;
-    }
-
-    .meta-item {
-      font-size: 12.5px;
-      color: var(--gray-600);
-      display: flex;
-      align-items: center;
-      gap: 3px;
-    }
-
-    .meta-item svg { flex-shrink: 0; }
-
-    .meta-item.warn { color: var(--red); font-weight: 600; }
-
-    /* Tags */
+    .card-body { flex: 1; min-width: 0; }
+    .name-row { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+    .s-nickname { font-size: 15.5px; font-weight: 700; color: var(--navy); }
+    .s-fullname { font-size: 13px; color: var(--gray-600); }
     .tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 3px;
-      padding: 2px 8px;
-      border-radius: 12px;
-      font-size: 11.5px;
-      font-weight: 600;
-      background: var(--gray-100);
-      color: var(--gray-600);
+      display: inline-flex; align-items: center; gap: 2px;
+      padding: 2px 8px; border-radius: 12px;
+      font-size: 11.5px; font-weight: 600;
     }
+    .tag.dept    { background: rgba(28,41,81,0.1); color: var(--navy); }
+    .tag.period  { background: var(--orange-bg); color: var(--orange); }
 
-    .tag.dept { background: var(--navy-20); color: var(--navy); }
-    .tag.warn-tag { background: #FEE2E2; color: var(--red); }
-    .tag.ok-tag   { background: #DCFCE7; color: #15803D; }
-
-    /* Buttons area */
-    .student-actions {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 6px;
-      flex-shrink: 0;
+    .meta-row { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-top: 5px; }
+    .meta-item {
+      font-size: 12.5px; color: var(--gray-600);
+      display: flex; align-items: center; gap: 3px;
     }
+    .meta-item.warn  { color: var(--red); font-weight: 600; }
+    .meta-item.soft  { color: var(--gray-400); }
 
+    .warn-banner {
+      margin-top: 6px;
+      background: #FFF7ED; border: 1.5px solid #FDE68A;
+      border-radius: var(--r-sm); padding: 5px 10px;
+      font-size: 12.5px; color: #92400E;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .warn-banner.red { background:#FEF2F2; border-color:#FECACA; color:var(--red); }
+
+    /* Action buttons */
+    .card-actions {
+      display: flex; flex-direction: column;
+      align-items: flex-end; gap: 5px; flex-shrink: 0;
+    }
     .btn-check {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 7px 14px;
-      border-radius: var(--radius-sm);
-      font-family: var(--font);
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      border: none;
-      transition: all 0.18s;
-    }
-
-    .btn-check.tutor  { background: var(--navy); color: var(--white); }
-    .btn-check.online { background: var(--orange); color: var(--white); }
-    .btn-check.watsen { background: #7C3AED; color: var(--white); }
-
-    .btn-check:hover { filter: brightness(1.12); transform: translateY(-1px); }
-
-    .btn-check.locked-btn {
-      background: var(--locked);
-      color: var(--white);
-      cursor: not-allowed;
-      transform: none;
-      filter: none;
-    }
-
-    .lock-badge {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 11px;
-      color: var(--locked);
-      font-weight: 500;
-    }
-
-    /* ============================================================
-       REPORT PAGE
-    ============================================================ */
-    .report-table-wrap { overflow-x: auto; margin-top: 8px; }
-
-    .report-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-    }
-
-    .report-table thead tr {
-      background: var(--navy);
-      color: var(--white);
-    }
-
-    .report-table th {
-      padding: 10px 14px;
-      font-weight: 600;
-      font-size: 13px;
-      text-align: left;
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 7px 13px; border-radius: var(--r-sm);
+      border: none; font-family: var(--font);
+      font-size: 13px; font-weight: 700;
+      cursor: pointer; transition: all .18s;
       white-space: nowrap;
     }
-
-    .report-table td {
-      padding: 10px 14px;
-      border-bottom: 1px solid var(--gray-100);
-      vertical-align: middle;
+    .btn-check.tutor  { background: var(--navy);   color: var(--white); }
+    .btn-check.online { background: var(--orange);  color: var(--white); }
+    .btn-check.draw   { background: var(--purple);  color: var(--white); }
+    .btn-check:not(:disabled):hover { filter: brightness(1.12); transform: translateY(-1px); }
+    .btn-check:disabled,
+    .btn-check.locked-btn {
+      background: var(--locked-bg);
+      color: var(--locked-col);
+      border: 1.5px solid var(--gray-200);
+      cursor: not-allowed;
+      transform: none; filter: none;
     }
 
+    /* ===== REPORT TABLE ===== */
+    .report-table-wrap { overflow-x: auto; border-radius: var(--r); box-shadow: var(--sh); }
+    .report-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .report-table thead tr { background: var(--navy); color: var(--white); }
+    .report-table th { padding: 10px 14px; font-weight: 600; font-size: 13px; text-align: left; white-space: nowrap; }
+    .report-table td { padding: 10px 14px; border-bottom: 1px solid var(--gray-100); vertical-align: middle; }
     .report-table tbody tr:nth-child(even) { background: var(--gray-50); }
     .report-table tbody tr:hover { background: var(--orange-bg); }
+    .report-table td:first-child { color: var(--gray-400); font-size: 13px; }
 
     .mode-badge {
-      display: inline-block;
-      padding: 2px 10px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 600;
+      display: inline-block; padding: 2px 10px; border-radius: 12px;
+      font-size: 12px; font-weight: 700;
     }
-
-    .mode-badge.tutor  { background: var(--navy-20); color: var(--navy); }
+    .mode-badge.tutor  { background: rgba(28,41,81,0.1); color: var(--navy); }
     .mode-badge.online { background: var(--orange-bg); color: var(--orange); }
-    .mode-badge.watsen { background: #EDE9FE; color: #7C3AED; }
+    .mode-badge.draw   { background: #EDE9FE; color: var(--purple); }
 
-    /* ============================================================
-       EMPTY / LOADING / TOAST
-    ============================================================ */
+    /* ===== EMPTY / LOADING / TOAST ===== */
     .empty-state {
-      text-align: center;
-      padding: 48px 24px;
-      color: var(--gray-400);
+      text-align: center; padding: 52px 24px; color: var(--gray-400);
     }
-
-    .empty-state svg { opacity: 0.3; margin-bottom: 12px; }
+    .empty-state svg { display: block; margin: 0 auto 12px; opacity:.25; }
     .empty-state p { font-size: 15px; }
 
     .loading-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(28,41,81,0.18);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 999;
-    }
-
-    .spinner {
-      width: 44px; height: 44px;
-      border: 4px solid var(--gray-200);
-      border-top-color: var(--orange);
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .toast-container {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+      position: fixed; inset: 0;
+      background: rgba(28,41,81,0.20);
+      display: flex; align-items: center; justify-content: center;
       z-index: 9999;
     }
+    .spinner {
+      width: 46px; height: 46px;
+      border: 4px solid rgba(255,255,255,0.3);
+      border-top-color: var(--orange);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
+    .toast-wrap {
+      position: fixed; bottom: 22px; right: 22px;
+      display: flex; flex-direction: column; gap: 7px;
+      z-index: 9998;
+    }
     .toast {
-      background: var(--gray-800);
-      color: var(--white);
-      padding: 12px 18px;
-      border-radius: var(--radius);
-      font-size: 14px;
-      font-weight: 500;
-      box-shadow: var(--shadow-md);
-      animation: slideUp 0.3s ease;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      max-width: 320px;
+      background: var(--gray-800); color: var(--white);
+      padding: 11px 17px; border-radius: var(--r);
+      font-size: 13.5px; font-weight: 500;
+      box-shadow: var(--sh-md);
+      animation: toastIn .28s ease;
+      display: flex; align-items: center; gap: 8px;
+      max-width: 310px;
+    }
+    .toast.ok   { background: #14532D; border-left: 4px solid var(--green); }
+    .toast.err  { background: #7F1D1D; border-left: 4px solid var(--red); }
+    .toast.warn { background: #78350F; border-left: 4px solid var(--yellow); }
+    @keyframes toastIn {
+      from { opacity:0; transform: translateY(10px); }
+      to   { opacity:1; transform: translateY(0); }
     }
 
-    .toast.success { background: #166534; border-left: 4px solid var(--green); }
-    .toast.error   { background: #7F1D1D; border-left: 4px solid var(--red); }
-    .toast.warn    { background: #78350F; border-left: 4px solid var(--yellow); }
-
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(12px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Warn banner */
-    .warn-banner {
-      background: #FFF7ED;
-      border: 1.5px solid #FED7AA;
-      border-radius: var(--radius-sm);
-      padding: 8px 12px;
-      font-size: 12.5px;
-      color: #92400E;
-      margin-top: 6px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    /* ============================================================
-       RESPONSIVE
-    ============================================================ */
-    @media (max-width: 640px) {
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 600px) {
       .filter-row { flex-direction: column; align-items: flex-start; }
-      .student-card { flex-direction: column; }
-      .student-actions { flex-direction: row; align-items: flex-start; flex-wrap: wrap; }
+      .student-card { flex-wrap: wrap; }
+      .card-actions { flex-direction: row; flex-wrap: wrap; width: 100%; justify-content: flex-start; }
       .tab-btn { padding: 10px 14px; font-size: 13px; }
-      .header-brand .title-main { font-size: 18px; }
+      .brand-text .t1 { font-size: 16px; }
+      .section-body { padding: 12px; }
     }
   </style>
 </head>
 <body>
-
-<!-- ============================================================
-     APP SHELL
-============================================================ -->
 <div class="app-wrapper">
 
-  <!-- HEADER -->
+  <!-- ===== HEADER ===== -->
   <header class="app-header">
     <div class="header-brand">
-      <!-- Calendar icon -->
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF8C00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-      </svg>
-      <span class="title-main">ระบบเช็คชื่อ</span>
-      <span class="title-sub">ARTNOLATE</span>
+      <div class="brand-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round">
+          <rect x="3" y="4" width="18" height="18" rx="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+          <line x1="8" y1="14" x2="8" y2="14" stroke-width="3"/>
+          <line x1="12" y1="14" x2="12" y2="14" stroke-width="3"/>
+          <line x1="8" y1="18" x2="8" y2="18" stroke-width="3"/>
+          <line x1="12" y1="18" x2="12" y2="18" stroke-width="3"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <span class="t1">ระบบเช็คชื่อ</span>
+        <span class="t2">ARTNOLATE</span>
+      </div>
     </div>
     <nav class="tab-nav">
-      <button class="tab-btn active" onclick="switchTab('checkin')" id="tab-checkin">
-        <span class="tab-icon">✅</span>เช็คชื่อ
+      <button class="tab-btn active" id="tab-checkin" onclick="switchTab('checkin')">
+        ✅&nbsp; เช็คชื่อ
       </button>
-      <button class="tab-btn" onclick="switchTab('report')" id="tab-report">
-        <span class="tab-icon">📋</span>รายงานประจำวัน
+      <button class="tab-btn" id="tab-report" onclick="switchTab('report')">
+        📋&nbsp; รายงานประจำวัน
       </button>
     </nav>
   </header>
 
-  <!-- ============================================================
-       TAB: CHECKIN
-  ============================================================ -->
+  <!-- ======================================================
+       PAGE: CHECKIN
+  ====================================================== -->
   <div id="page-checkin">
-    <!-- Filter Bar -->
+
+    <!-- Filter bar -->
     <div class="filter-bar">
       <div class="filter-row">
-        <!-- Date -->
+
+        <!-- วันที่ -->
         <div class="filter-group">
           <span class="filter-label">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>
             วันที่
           </span>
-          <input type="date" id="checkin-date" class="form-control" />
+          <input type="date" id="checkin-date" class="form-control" onchange="onDateChange()" />
         </div>
 
-        <!-- Mode -->
+        <!-- รูปแบบ -->
         <div class="filter-group">
           <span class="filter-label">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             รูปแบบ
           </span>
           <div class="mode-pills">
-            <button class="pill-btn active" onclick="setMode('ติวสด')" id="pill-tutor">ติวสด</button>
-            <button class="pill-btn" onclick="setMode('ออนไลน์')" id="pill-online">ออนไลน์</button>
+            <button class="pill-btn active" id="pill-tutor"  onclick="setMode('ติวสด')">ติวสด</button>
+            <button class="pill-btn"        id="pill-online" onclick="setMode('ออนไลน์')">ออนไลน์</button>
           </div>
         </div>
 
-        <!-- Dept -->
+        <!-- ภาควิชา -->
         <div class="filter-group">
           <span class="filter-label">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             ภาควิชา
           </span>
-          <select id="filter-dept" class="form-control" onchange="renderStudentList()">
+          <select id="filter-dept" class="form-control" onchange="renderList()">
             <option value="all">ทั้งหมด</option>
             <option value="ศิลปกรรม">ศิลปกรรม</option>
             <option value="สถาปัตยกรรม">สถาปัตยกรรม</option>
-            <option value="ภูมิสถาปัตยกรรม">ภูมิสถาปัตยกรรม/สถาปัตยกรรมไทย</option>
-            <option value="สถาปัตยกรรมภายใน">สถาปัตยกรรมภายใน/ออกแบบภายใน</option>
-            <option value="นิเทศศิลป์">นิเทศศิลป์/ออกแบบการสื่อสาร</option>
+            <option value="ภูมิสถาปัตยกรรม">ภูมิสถาปัตยกรรม / สถาปัตยกรรมไทย</option>
+            <option value="สถาปัตยกรรมภายใน">สถาปัตยกรรมภายใน / ออกแบบภายใน</option>
+            <option value="นิเทศศิลป์">นิเทศศิลป์ / ออกแบบการสื่อสาร</option>
             <option value="ภาพยนตร์">ภาพยนตร์</option>
             <option value="อนิเมชัน">อนิเมชัน</option>
             <option value="การถ่ายภาพ">การถ่ายภาพ</option>
-            <option value="ศิลปอุตสาหกรรม">ศิลปอุตสาหกรรม/จิวเวลรี่</option>
+            <option value="ศิลปอุตสาหกรรม">ศิลปอุตสาหกรรม / จิวเวลรี่</option>
             <option value="แฟชั่น">แฟชั่น</option>
             <option value="พื้นฐาน">พื้นฐาน</option>
           </select>
         </div>
+
+        <!-- ปุ่ม Refresh -->
+        <button class="pill-btn" onclick="loadCheckin()" style="border-color:var(--navy);color:var(--navy)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="vertical-align:-2px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          รีเฟรช
+        </button>
       </div>
     </div>
 
     <!-- Summary strip -->
     <div class="summary-strip">
-      <span style="font-size:13px;font-weight:600;color:var(--navy);">สรุปวันนี้</span>
-      <div class="summary-chip" id="chip-total">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-        แสดง <span class="chip-count" id="count-show">0</span>
+      <span class="sum-label">สรุป</span>
+      <div class="chip">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        แสดง <span class="num" id="cnt-show">0</span>
       </div>
-      <div class="summary-chip orange" id="chip-checked">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-        เช็คแล้ว <span class="chip-count" id="count-checked">0</span>
+      <div class="chip grn">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        เช็คแล้ว <span class="num" id="cnt-checked">0</span>
+      </div>
+      <div class="chip org" id="chip-pending">
+        รอเช็ค <span class="num" id="cnt-pending">0</span>
       </div>
     </div>
 
-    <!-- Student List -->
-    <div class="section-content">
+    <!-- Student list -->
+    <div class="section-body">
       <div class="student-list" id="student-list">
         <div class="empty-state">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
           <p>กำลังโหลดข้อมูล...</p>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ============================================================
-       TAB: REPORT
-  ============================================================ -->
-  <div id="page-report" style="display:none;">
-    <!-- Filter Bar -->
+  <!-- ======================================================
+       PAGE: REPORT
+  ====================================================== -->
+  <div id="page-report" style="display:none">
+
+    <!-- Filter bar -->
     <div class="filter-bar">
       <div class="filter-row">
         <div class="filter-group">
           <span class="filter-label">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>
             วันที่
           </span>
           <input type="date" id="report-date" class="form-control" onchange="loadReport()" />
         </div>
+        <button class="pill-btn" onclick="loadReport()" style="border-color:var(--navy);color:var(--navy)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="vertical-align:-2px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          โหลดใหม่
+        </button>
       </div>
     </div>
 
     <!-- Summary strip -->
     <div class="summary-strip">
-      <span style="font-size:13px;font-weight:600;color:var(--navy);">สรุปการเช็คชื่อ</span>
-      <div class="summary-chip">
-        รวม <span class="chip-count" id="report-count-total">0</span>
-      </div>
-      <div class="summary-chip">
-        ติวสด <span class="chip-count" id="report-count-tutor">0</span>
-      </div>
-      <div class="summary-chip orange">
-        ออนไลน์ <span class="chip-count" id="report-count-online">0</span>
-      </div>
+      <span class="sum-label">รายงาน</span>
+      <div class="chip">รวม <span class="num" id="r-total">0</span></div>
+      <div class="chip">ติวสด <span class="num" id="r-tutor">0</span></div>
+      <div class="chip org">ออนไลน์ <span class="num" id="r-online">0</span></div>
     </div>
 
-    <!-- Report Table -->
-    <div class="section-content">
+    <!-- Table -->
+    <div class="section-body">
       <div class="report-table-wrap">
         <table class="report-table">
           <thead>
@@ -656,93 +466,82 @@
               <th>รูปแบบ</th>
             </tr>
           </thead>
-          <tbody id="report-tbody"></tbody>
+          <tbody id="report-body"></tbody>
         </table>
       </div>
-      <div id="report-empty" class="empty-state" style="display:none;">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+      <div id="report-empty" class="empty-state" style="display:none">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
         <p>ไม่มีรายชื่อในวันที่เลือก</p>
       </div>
     </div>
   </div>
 
-</div>
+</div><!-- /app-wrapper -->
 
 <!-- Loading overlay -->
-<div class="loading-overlay" id="loading-overlay" style="display:none;">
+<div class="loading-overlay" id="loading" style="display:none">
   <div class="spinner"></div>
 </div>
 
-<!-- Toast container -->
-<div class="toast-container" id="toast-container"></div>
+<!-- Toast -->
+<div class="toast-wrap" id="toast-wrap"></div>
 
-<!-- ============================================================
+<!-- ======================================================
      JAVASCRIPT
-============================================================ -->
+====================================================== -->
 <script>
 // ============================================================
 // STATE
 // ============================================================
-let allStudents  = [];
-let checkedMap   = {};   // phone -> [modes]
-let currentMode  = 'ติวสด';
-let currentDate  = '';
+let allStudents = [];
+let checkedMap  = {};   // { "0812345678": ["ติวสด", "วิชาภาค", ...] }
+let currentMode = 'ติวสด';
+let currentDate = '';
 
-// Dept alias map for fuzzy matching
-const DEPT_ALIASES = {
-  'ศิลปกรรม':         ['ศิลปกรรม','fine art','fine arts'],
-  'สถาปัตยกรรม':      ['สถาปัตยกรรม','architecture'],
-  'ภูมิสถาปัตยกรรม':  ['ภูมิสถาปัตยกรรม','สถาปัตยกรรมไทย','landscape'],
-  'สถาปัตยกรรมภายใน': ['สถาปัตยกรรมภายใน','ออกแบบภายใน','interior'],
-  'นิเทศศิลป์':       ['นิเทศศิลป์','ออกแบบการสื่อสาร','communication','visual communication'],
-  'ภาพยนตร์':         ['ภาพยนตร์','film'],
-  'อนิเมชัน':         ['อนิเมชัน','animation'],
-  'การถ่ายภาพ':       ['การถ่ายภาพ','photography'],
-  'ศิลปอุตสาหกรรม':   ['ศิลปอุตสาหกรรม','จิวเวลรี่','industrial','jewellery','jewelry'],
-  'แฟชั่น':           ['แฟชั่น','fashion'],
-  'พื้นฐาน':          ['พื้นฐาน','foundation'],
+// ============================================================
+// DEPT matching — ตรงกับชื่อย่อที่อาจอยู่ใน Sheet
+// ============================================================
+const DEPT_KEYS = {
+  'ศิลปกรรม':          ['ศิลปกรรม'],
+  'สถาปัตยกรรม':       ['สถาปัตยกรรม'],
+  'ภูมิสถาปัตยกรรม':   ['ภูมิสถาปัตยกรรม','สถาปัตยกรรมไทย'],
+  'สถาปัตยกรรมภายใน':  ['สถาปัตยกรรมภายใน','ออกแบบภายใน'],
+  'นิเทศศิลป์':        ['นิเทศศิลป์','ออกแบบการสื่อสาร'],
+  'ภาพยนตร์':          ['ภาพยนตร์'],
+  'อนิเมชัน':          ['อนิเมชัน'],
+  'การถ่ายภาพ':        ['การถ่ายภาพ'],
+  'ศิลปอุตสาหกรรม':    ['ศิลปอุตสาหกรรม','จิวเวลรี่'],
+  'แฟชั่น':            ['แฟชั่น'],
+  'พื้นฐาน':           ['พื้นฐาน'],
 };
 
 // ============================================================
-// GOOGLE APPS SCRIPT BRIDGE
+// GAS BRIDGE — เรียกฟังก์ชันใน Code.gs
 // ============================================================
-function callGAS(fnName, ...args) {
-  return new Promise((resolve, reject) => {
+function callGAS(fn, ...args) {
+  return new Promise((ok, fail) => {
     if (typeof google !== 'undefined' && google.script && google.script.run) {
-      google.script.run
-        .withSuccessHandler(resolve)
-        .withFailureHandler(reject)
-        [fnName](...args);
+      google.script.run.withSuccessHandler(ok).withFailureHandler(fail)[fn](...args);
     } else {
-      // Demo mode — mock data for testing outside GAS
-      console.warn('[DEMO] GAS not available. Using mock data.');
-      resolve(getMockData(fnName, ...args));
+      // Demo mode (ทดสอบนอก GAS)
+      console.warn('[DEMO] GAS ไม่ได้เชื่อมต่อ ใช้ข้อมูลตัวอย่าง');
+      setTimeout(() => ok(demoData(fn, ...args)), 300);
     }
   });
 }
 
-function getMockData(fnName, ...args) {
-  if (fnName === 'getStudents') {
-    return {
-      success: true,
-      data: [
-        { rowIndex: 2, nickname: 'ป๊อป', fullname: 'ปภาดา รัตนสุข', school: 'โรงเรียนสาธิต', dept: 'สถาปัตยกรรม', phone: '0812345678', course: 'เหมา', remaining: '', expire: '30/07/2568', period: '1', buttons: ['ติวสด','วิชาภาค','วาดเส้น'], warnRemaining: false, warnExpire: false },
-        { rowIndex: 3, nickname: 'มิ้น', fullname: 'ณิชาภัทร พิริยะ', school: 'โรงเรียนเตรียมอุดม', dept: 'ศิลปกรรม', phone: '0823456789', course: 'ติวสด เข้ม 30 วัน', remaining: '5', expire: '15/06/2568', period: '2', buttons: ['ติวสด'], warnRemaining: false, warnExpire: true },
-        { rowIndex: 4, nickname: 'ไอซ์', fullname: 'ธนัท วงษ์สวรรค์', school: 'Triamudom', dept: 'นิเทศศิลป์', phone: '0834567890', course: 'คอร์สออนไลน์ [10 ครั้ง/30 วัน]', remaining: '2', expire: '20/06/2568', period: '1', buttons: ['วิชาภาค'], warnRemaining: true, warnExpire: true },
-        { rowIndex: 5, nickname: 'เฟิร์น', fullname: 'วิชญา มาลัย', school: 'โรงเรียนสวนกุหลาบ', dept: 'ภาพยนตร์', phone: '0845678901', course: 'Mix เหมา+ออนไลน์', remaining: '', expire: '10/08/2568', period: '3', buttons: ['ติวสด','วิชาภาค','วาดเส้น'], warnRemaining: false, warnExpire: false },
-        { rowIndex: 6, nickname: 'นัท', fullname: 'วรนัน ศรีเมือง', school: 'โรงเรียนหอวัง', dept: 'อนิเมชัน', phone: '0856789012', course: 'คอร์สออนไลน์ [Buffet/30 วัน]', remaining: '8', expire: '25/07/2568', period: '1', buttons: ['วิชาภาค','วาดเส้น'], warnRemaining: false, warnExpire: false },
-      ]
-    };
-  }
-  if (fnName === 'getAttendanceToday') {
-    return { success: true, checkedPhones: {} };
-  }
-  if (fnName === 'saveAttendance') {
-    return { success: true };
-  }
-  if (fnName === 'getAttendanceLog') {
-    return { success: true, data: [], countTutor: 0, countOnline: 0 };
-  }
+function demoData(fn, ...args) {
+  if (fn === 'getStudents') return { success: true, data: [
+    { rowIndex:2, nickname:'ป๊อป', fullname:'ปภาดา รัตนสุข',    school:'สาธิตจุฬา',    dept:'สถาปัตยกรรม',  phone:'0812345678', course:'เหมา ติวสด + ออนไลน์',           remaining:'',  expire:'30/07/2568', period:'1', buttons:['ติวสด','วิชาภาค','วาดเส้น'], warnRemaining:false, warnExpire:false },
+    { rowIndex:3, nickname:'มิ้น', fullname:'ณิชาภัทร พิริยะ',  school:'เตรียมอุดม',   dept:'ศิลปกรรม',     phone:'0823456789', course:'ติวสด เข้ม 30 วัน',               remaining:'5', expire:'20/06/2568', period:'2', buttons:['ติวสด'],                     warnRemaining:false, warnExpire:true  },
+    { rowIndex:4, nickname:'ไอซ์', fullname:'ธนัท วงษ์สวรรค์', school:'เตรียมอุดม',   dept:'นิเทศศิลป์',   phone:'0834567890', course:'คอร์สออนไลน์ [10 ครั้ง/30 วัน]', remaining:'2', expire:'18/06/2568', period:'1', buttons:['วิชาภาค'],                   warnRemaining:true,  warnExpire:true  },
+    { rowIndex:5, nickname:'เฟิร์น',fullname:'วิชญา มาลัย',   school:'สวนกุหลาบ',     dept:'ภาพยนตร์',     phone:'0845678901', course:'Mix เหมา+ออนไลน์',               remaining:'',  expire:'10/08/2568', period:'3', buttons:['ติวสด','วิชาภาค','วาดเส้น'], warnRemaining:false, warnExpire:false },
+    { rowIndex:6, nickname:'นัท',  fullname:'วรนัน ศรีเมือง',  school:'หอวัง',         dept:'อนิเมชัน',     phone:'0856789012', course:'คอร์สออนไลน์ [Buffet/30 วัน]',   remaining:'8', expire:'25/07/2568', period:'1', buttons:['วิชาภาค','วาดเส้น'],         warnRemaining:false, warnExpire:false },
+    { rowIndex:7, nickname:'บีม',  fullname:'ปัณณทัต ชนะภัย', school:'สาธิตเกษตร',   dept:'พื้นฐาน',      phone:'0867890123', course:'คอร์สออนไลน์ [12 ครั้ง/30 วัน]', remaining:'3', expire:'05/07/2568', period:'2', buttons:['วาดเส้น'],                   warnRemaining:false, warnExpire:false },
+  ]};
+  if (fn === 'getAttendanceToday') return { success: true, checkedPhones: {} };
+  if (fn === 'saveAttendance')     return { success: true };
+  if (fn === 'getAttendanceLog')   return { success: true, data: [], countTutor: 0, countOnline: 0 };
   return null;
 }
 
@@ -750,211 +549,216 @@ function getMockData(fnName, ...args) {
 // INIT
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
-  const today = getTodayStr();
+  const today = todayStr();
   currentDate = today;
   document.getElementById('checkin-date').value = today;
   document.getElementById('report-date').value  = today;
-  document.getElementById('checkin-date').addEventListener('change', onDateChange);
-  loadCheckinPage();
+  loadCheckin();
 });
 
-function getTodayStr() {
+function todayStr() {
   const d = new Date();
-  const y = d.getFullYear();
-  const m = (d.getMonth()+1).toString().padStart(2,'0');
-  const dd= d.getDate().toString().padStart(2,'0');
-  return `${y}-${m}-${dd}`;
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 }
-
-async function loadCheckinPage() {
-  showLoading(true);
-  try {
-    const [studRes, attRes] = await Promise.all([
-      callGAS('getStudents'),
-      callGAS('getAttendanceToday', currentDate)
-    ]);
-    if (!studRes.success) throw new Error(studRes.error);
-    if (!attRes.success)  throw new Error(attRes.error);
-
-    allStudents = studRes.data;
-    checkedMap  = attRes.checkedPhones || {};
-    renderStudentList();
-  } catch(e) {
-    showToast('โหลดข้อมูลไม่สำเร็จ: ' + e.message, 'error');
-  } finally {
-    showLoading(false);
-  }
-}
+const pad = n => String(n).padStart(2,'0');
 
 // ============================================================
-// TAB SWITCHING
+// TAB SWITCH
 // ============================================================
 function switchTab(tab) {
-  document.getElementById('page-checkin').style.display = tab === 'checkin' ? '' : 'none';
-  document.getElementById('page-report').style.display  = tab === 'report'  ? '' : 'none';
-  document.getElementById('tab-checkin').classList.toggle('active', tab === 'checkin');
-  document.getElementById('tab-report').classList.toggle('active',  tab === 'report');
+  document.getElementById('page-checkin').style.display = tab==='checkin' ? '' : 'none';
+  document.getElementById('page-report').style.display  = tab==='report'  ? '' : 'none';
+  document.getElementById('tab-checkin').classList.toggle('active', tab==='checkin');
+  document.getElementById('tab-report').classList.toggle('active',  tab==='report');
   if (tab === 'report') loadReport();
 }
 
 // ============================================================
-// FILTER & RENDER
+// LOAD CHECKIN
 // ============================================================
-function setMode(mode) {
-  currentMode = mode;
-  document.getElementById('pill-tutor').classList.toggle('active',  mode === 'ติวสด');
-  document.getElementById('pill-online').classList.toggle('active', mode === 'ออนไลน์');
-  renderStudentList();
-}
-
-function onDateChange() {
-  currentDate = document.getElementById('checkin-date').value;
-  callGAS('getAttendanceToday', currentDate).then(res => {
-    checkedMap = (res && res.checkedPhones) ? res.checkedPhones : {};
-    renderStudentList();
-  });
-}
-
-function deptMatches(studentDept, filterVal) {
-  if (filterVal === 'all') return true;
-  const d = studentDept.toLowerCase();
-  const aliases = DEPT_ALIASES[filterVal] || [filterVal];
-  return aliases.some(a => d.includes(a.toLowerCase()));
-}
-
-function modeMatches(student, mode) {
-  const c = student.course.toLowerCase();
-  if (mode === 'ติวสด') {
-    return c.includes('เหมา') || c.includes('mix') || c.includes('ติวสด');
-  } else {
-    return c.includes('ออนไลน์') || c.includes('mix') || c.includes('เหมา');
+async function loadCheckin() {
+  showLoad(true);
+  try {
+    const [sRes, aRes] = await Promise.all([
+      callGAS('getStudents'),
+      callGAS('getAttendanceToday', currentDate)
+    ]);
+    if (!sRes.success) throw new Error(sRes.error);
+    if (!aRes.success) throw new Error(aRes.error);
+    allStudents = sRes.data;
+    checkedMap  = aRes.checkedPhones || {};
+    renderList();
+  } catch(e) {
+    toast('โหลดข้อมูลไม่สำเร็จ: ' + e.message, 'err');
+    document.getElementById('student-list').innerHTML =
+      `<div class="empty-state"><p>❌ ${esc(e.message)}</p></div>`;
+  } finally {
+    showLoad(false);
   }
 }
 
-function renderStudentList() {
-  const deptFilter = document.getElementById('filter-dept').value;
+// ============================================================
+// DATE & MODE CHANGE
+// ============================================================
+function onDateChange() {
+  currentDate = document.getElementById('checkin-date').value;
+  showLoad(true);
+  callGAS('getAttendanceToday', currentDate)
+    .then(res => {
+      checkedMap = (res && res.success) ? (res.checkedPhones||{}) : {};
+      renderList();
+    })
+    .catch(e => toast('โหลดสถานะไม่สำเร็จ: '+e.message,'err'))
+    .finally(()=>showLoad(false));
+}
+
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('pill-tutor').classList.toggle('active',  mode==='ติวสด');
+  document.getElementById('pill-online').classList.toggle('active', mode==='ออนไลน์');
+  renderList();
+}
+
+// ============================================================
+// FILTER HELPERS
+// ============================================================
+function matchMode(s, mode) {
+  const c = s.course.toLowerCase();
+  if (mode === 'ติวสด')
+    return c.includes('เหมา') || c.includes('mix') || (c.includes('ติวสด') && !c.includes('ออนไลน์'));
+  // ออนไลน์
+  return c.includes('ออนไลน์') || c.includes('mix') || c.includes('เหมา');
+}
+
+function matchDept(studentDept, sel) {
+  if (sel === 'all') return true;
+  const d = studentDept.toLowerCase();
+  return (DEPT_KEYS[sel] || [sel]).some(k => d.includes(k.toLowerCase()));
+}
+
+// ============================================================
+// RENDER STUDENT LIST
+// ============================================================
+function renderList() {
+  const dept = document.getElementById('filter-dept').value;
   const list = document.getElementById('student-list');
 
-  const filtered = allStudents.filter(s =>
-    modeMatches(s, currentMode) && deptMatches(s.dept, deptFilter)
-  );
+  const filtered = allStudents.filter(s => matchMode(s, currentMode) && matchDept(s.dept, dept));
 
-  // Update summary
-  const checkedCount = filtered.filter(s => {
-    const modes = checkedMap[s.phone] || [];
-    return modes.some(m => resolveCheckMode(m, currentMode));
-  }).length;
+  // ตรวจว่า locked คือ ทุกปุ่มของโหมดปัจจุบันถูกกดแล้ว
+  let checkedCnt = 0;
+  filtered.forEach(s => {
+    const done = checkedMap[s.phone] || [];
+    const relevant = s.buttons.filter(b => btnMatchesMode(b, currentMode));
+    if (relevant.length > 0 && relevant.every(b => done.includes(b))) checkedCnt++;
+  });
 
-  document.getElementById('count-show').textContent    = filtered.length;
-  document.getElementById('count-checked').textContent = checkedCount;
+  document.getElementById('cnt-show').textContent    = filtered.length;
+  document.getElementById('cnt-checked').textContent = checkedCnt;
+  document.getElementById('cnt-pending').textContent = filtered.length - checkedCnt;
 
   if (filtered.length === 0) {
     list.innerHTML = `
       <div class="empty-state">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-        <p>ไม่มีนักเรียนในหมวดที่เลือก</p>
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        <p>ไม่มีนักเรียนที่ตรงกับตัวกรองที่เลือก</p>
       </div>`;
     return;
   }
-
-  list.innerHTML = filtered.map(s => buildStudentCard(s)).join('');
+  list.innerHTML = filtered.map(buildCard).join('');
 }
 
-function resolveCheckMode(logMode, currentMode) {
-  if (currentMode === 'ออนไลน์') return logMode === 'วิชาภาค' || logMode === 'วาดเส้น';
-  return logMode === currentMode || logMode === 'ติวสด';
+// ปุ่มนี้เกี่ยวข้องกับโหมดปัจจุบันไหม
+function btnMatchesMode(btn, mode) {
+  if (mode === 'ติวสด')  return btn === 'ติวสด';
+  return btn === 'วิชาภาค' || btn === 'วาดเส้น';
 }
 
 // ============================================================
 // BUILD STUDENT CARD
 // ============================================================
-function buildStudentCard(s) {
-  const avatarLetter = s.nickname ? s.nickname[0] : '?';
-  const checkedModes = checkedMap[s.phone] || [];
+function buildCard(s) {
+  const letter   = s.nickname ? s.nickname[0] : '?';
+  const done     = checkedMap[s.phone] || [];
 
-  // Build buttons
-  const btnHtml = s.buttons.map(btnType => {
-    const modeKey = btnType === 'ติวสด' ? 'ติวสด' : btnType;
-    const alreadyChecked = checkedModes.includes(modeKey);
-    const cls = btnType === 'ติวสด' ? 'tutor' : (btnType === 'วาดเส้น' ? 'watsen' : 'online');
+  // แสดงเฉพาะปุ่มที่เกี่ยวข้องกับโหมดที่เลือก
+  const visibleBtns = s.buttons.filter(b => btnMatchesMode(b, currentMode));
+  const allLocked   = visibleBtns.length > 0 && visibleBtns.every(b => done.includes(b));
 
-    if (alreadyChecked) {
+  const btnHtml = visibleBtns.map(btn => {
+    const locked = done.includes(btn);
+    if (locked) {
       return `<button class="btn-check locked-btn" disabled>
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        ${btnType}
+        ${btn}
       </button>`;
     }
-    return `<button class="btn-check ${cls}"
-      onclick="doCheckIn('${escape(JSON.stringify(s))}', '${modeKey}')">
+    const cls = btn==='ติวสด' ? 'tutor' : (btn==='วาดเส้น' ? 'draw' : 'online');
+    const sid = encodeURIComponent(JSON.stringify(s));
+    return `<button class="btn-check ${cls}" onclick="doCheckIn(this,'${sid}','${btn}')">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-      ${btnType}
+      ${btn}
     </button>`;
   }).join('');
 
-  // Warnings
-  let warnHtml = '';
-  if (s.warnRemaining) warnHtml += `<div class="warn-banner">⚠️ ครั้งเรียนเหลือน้อย (${s.remaining} ครั้ง)</div>`;
-  if (s.warnExpire)    warnHtml += `<div class="warn-banner">⚠️ คอร์สใกล้หมดอายุ (${s.expire})</div>`;
+  // แถบเตือน
+  let warns = '';
+  if (s.warnRemaining) warns += `<div class="warn-banner red">⚠️ ครั้งเรียนเหลือน้อย (${esc(s.remaining)} ครั้ง) — ควรต่ออายุ</div>`;
+  if (s.warnExpire)    warns += `<div class="warn-banner">⏰ คอร์สใกล้หมดอายุ ${esc(s.expire)}</div>`;
 
-  // Tags
-  const deptTag    = s.dept    ? `<span class="tag dept">${s.dept}</span>` : '';
-  const periodTag  = s.period  ? `<span class="tag">รอบ ${s.period}</span>` : '';
+  const deptTag   = s.dept   ? `<span class="tag dept">${esc(s.dept)}</span>` : '';
+  const periodTag = s.period ? `<span class="tag period">รอบ ${esc(s.period)}</span>` : '';
 
-  // Remaining display
-  const remainDisplay = s.remaining && s.remaining !== ''
+  const remainMeta = s.remaining
     ? `<span class="meta-item${s.warnRemaining?' warn':''}">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        เหลือ ${s.remaining} ครั้ง
-      </span>` : '';
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        เหลือ ${esc(s.remaining)} ครั้ง</span>` : '';
 
-  // Expire display
-  const expireDisplay = s.expire
+  const expireMeta = s.expire
     ? `<span class="meta-item${s.warnExpire?' warn':''}">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        ${s.expire}
-      </span>` : '';
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        ${esc(s.expire)}</span>` : '';
 
-  const isLocked = s.buttons.length > 0 && s.buttons.every(b => (checkedMap[s.phone]||[]).includes(b === 'วิชาภาค' || b === 'วาดเส้น' ? b : b));
+  const courseMeta = `<span class="meta-item soft">
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+    ${esc(s.course)}</span>`;
 
   return `
-  <div class="student-card${isLocked?' locked':''}">
-    <div class="student-avatar">${avatarLetter}</div>
-    <div class="student-body">
-      <div class="student-name-row">
-        <span class="student-nickname">${esc(s.nickname)}</span>
-        <span class="student-fullname">${esc(s.fullname)}</span>
-        ${deptTag} ${periodTag}
+  <div class="student-card${allLocked?' all-locked':''}">
+    <div class="avatar">${esc(letter)}</div>
+    <div class="card-body">
+      <div class="name-row">
+        <span class="s-nickname">${esc(s.nickname)}</span>
+        <span class="s-fullname">${esc(s.fullname)}</span>
+        ${deptTag}${periodTag}
       </div>
-      <div class="student-meta">
+      <div class="meta-row">
         <span class="meta-item">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-          ${esc(s.school)}
-        </span>
-        ${remainDisplay} ${expireDisplay}
-        <span class="meta-item" style="color:var(--gray-400)">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
-          ${esc(s.course)}
-        </span>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          ${esc(s.school)}</span>
+        ${remainMeta}${expireMeta}${courseMeta}
       </div>
-      ${warnHtml}
+      ${warns}
     </div>
-    <div class="student-actions">
-      ${btnHtml}
-    </div>
+    <div class="card-actions">${btnHtml || '<span style="font-size:12px;color:var(--gray-400)">ไม่มีปุ่ม</span>'}</div>
   </div>`;
 }
 
 // ============================================================
-// CHECK IN ACTION
+// CHECK IN
 // ============================================================
-async function doCheckIn(studentJson, mode) {
+async function doCheckIn(btn, sid, mode) {
   let s;
-  try { s = JSON.parse(unescape(studentJson)); }
-  catch(e) { showToast('ข้อมูลผิดพลาด', 'error'); return; }
+  try { s = JSON.parse(decodeURIComponent(sid)); }
+  catch { toast('ข้อมูลผิดพลาด','err'); return; }
 
-  showLoading(true);
+  // ปิดปุ่มทันที (ป้องกัน double click)
+  btn.disabled = true;
+  btn.classList.add('locked-btn');
+
+  showLoad(true);
   try {
-    const payload = {
+    const res = await callGAS('saveAttendance', {
       dateStr:  currentDate,
       nickname: s.nickname,
       school:   s.school,
@@ -962,21 +766,22 @@ async function doCheckIn(studentJson, mode) {
       dept:     s.dept,
       period:   s.period,
       mode:     mode
-    };
-
-    const res = await callGAS('saveAttendance', payload);
+    });
     if (!res || !res.success) throw new Error(res ? res.error : 'บันทึกไม่สำเร็จ');
 
-    // Update local state
+    // อัปเดต state ทันที
     if (!checkedMap[s.phone]) checkedMap[s.phone] = [];
     checkedMap[s.phone].push(mode);
 
-    renderStudentList();
-    showToast(`✅ เช็คชื่อ ${s.nickname} — ${mode} สำเร็จ`, 'success');
+    renderList();
+    toast(`✅ เช็คชื่อ ${s.nickname} (${mode}) สำเร็จ`, 'ok');
   } catch(e) {
-    showToast('ไม่สำเร็จ: ' + e.message, 'error');
+    // คืนปุ่มถ้า error
+    btn.disabled = false;
+    btn.classList.remove('locked-btn');
+    toast('บันทึกไม่สำเร็จ: ' + e.message, 'err');
   } finally {
-    showLoading(false);
+    showLoad(false);
   }
 }
 
@@ -985,75 +790,60 @@ async function doCheckIn(studentJson, mode) {
 // ============================================================
 async function loadReport() {
   const dateStr = document.getElementById('report-date').value;
-  showLoading(true);
+  showLoad(true);
   try {
     const res = await callGAS('getAttendanceLog', dateStr);
     if (!res || !res.success) throw new Error(res ? res.error : 'โหลดไม่สำเร็จ');
 
-    const tbody = document.getElementById('report-tbody');
+    document.getElementById('r-total').textContent  = res.data.length;
+    document.getElementById('r-tutor').textContent  = res.countTutor  || 0;
+    document.getElementById('r-online').textContent = res.countOnline || 0;
+
+    const tbody = document.getElementById('report-body');
     const empty = document.getElementById('report-empty');
 
-    document.getElementById('report-count-total').textContent  = res.data.length;
-    document.getElementById('report-count-tutor').textContent  = res.countTutor  || 0;
-    document.getElementById('report-count-online').textContent = res.countOnline || 0;
-
     if (res.data.length === 0) {
-      tbody.innerHTML = '';
-      empty.style.display = '';
+      tbody.innerHTML      = '';
+      empty.style.display  = '';
       return;
     }
-
     empty.style.display = 'none';
     tbody.innerHTML = res.data.map(r => {
-      const modeClass = r.mode === 'ติวสด' ? 'tutor' : (r.mode === 'วาดเส้น' ? 'watsen' : 'online');
+      const mc = r.mode==='ติวสด' ? 'tutor' : (r.mode==='วาดเส้น' ? 'draw' : 'online');
       return `<tr>
         <td>${r.no}</td>
         <td><strong>${esc(r.nickname)}</strong></td>
         <td>${esc(r.school)}</td>
         <td>${esc(r.dept)}</td>
-        <td><span class="mode-badge ${modeClass}">${esc(r.mode)}</span></td>
+        <td><span class="mode-badge ${mc}">${esc(r.mode)}</span></td>
       </tr>`;
     }).join('');
   } catch(e) {
-    showToast('โหลดรายงานไม่สำเร็จ: ' + e.message, 'error');
+    toast('โหลดรายงานไม่สำเร็จ: '+e.message,'err');
   } finally {
-    showLoading(false);
+    showLoad(false);
   }
 }
 
 // ============================================================
 // UTILITIES
 // ============================================================
-function showLoading(show) {
-  document.getElementById('loading-overlay').style.display = show ? '' : 'none';
+function showLoad(v) { document.getElementById('loading').style.display = v ? '' : 'none'; }
+
+function toast(msg, type='ok') {
+  const wrap = document.getElementById('toast-wrap');
+  const el   = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  wrap.appendChild(el);
+  setTimeout(() => el.remove(), 3800);
 }
 
-function showToast(msg, type = 'success') {
-  const container = document.getElementById('toast-container');
-  const toast = document.createElement('div');
-  toast.className = `toast ${type}`;
-  toast.textContent = msg;
-  container.appendChild(toast);
-  setTimeout(() => toast.remove(), 3500);
-}
-
-function esc(str) {
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;');
-}
-
-function escape(str) {
-  return encodeURIComponent(str);
-}
-
-function unescape(str) {
-  return decodeURIComponent(str);
+function esc(s) {
+  return String(s||'')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 </script>
-
 </body>
 </html>
