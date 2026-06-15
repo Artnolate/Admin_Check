@@ -491,6 +491,29 @@
 ====================================================== -->
 <script>
 // ============================================================
+// GAS BRIDGE — เปลี่ยนมาใช้ fetch เพื่อเรียก Web App URL
+// ============================================================
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwy0jjqNph0MGvyUfcmtydSU2N2AfxZWZw23gPIGq5bK2KCTBWkzzJNpHFoY8JUukXL/exec';
+
+function callGAS(fn, ...args) {
+  let url = `${WEB_APP_URL}?action=${fn}`;
+  
+  // เพิ่มพารามิเตอร์สำหรับฟังก์ชันที่ต้องใช้ข้อมูลเพิ่มเติม
+  if (fn === 'getAttendanceToday' || fn === 'getAttendanceLog') {
+    url += `&date=${args[0]}`;
+  }
+
+  const options = { method: 'GET' };
+  
+  // หากเป็นฟังก์ชันบันทึกข้อมูล (saveAttendance) ต้องใช้ POST
+  if (fn === 'saveAttendance') {
+    options.method = 'POST';
+    options.body = JSON.stringify(args[0]); // ใช้ body แทน payload
+  }
+
+  return fetch(url, options).then(res => res.json());
+}
+// ============================================================
 // STATE
 // ============================================================
 let allStudents = [];
