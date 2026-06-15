@@ -1,938 +1,649 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ระบบเช็คชื่อ – ARTNOLATE</title>
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
-  <style>
-    /* =============================================
-       RESET & BASE
-    ============================================= */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ระบบเช็คชื่อ — ARTNOLATE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+/* ── Tokens ─────────────────────────────── */
+:root{
+  --bg:#F7F8FA; --surface:#fff; --border:#E4E7ED; --border-light:#EEF0F4;
+  --txt:#1A1D23; --txt2:#6B7280; --txt3:#9CA3AF;
+  --accent:#3D5AFE; --accent-l:#EEF1FF;
+  --green:#10B981; --green-l:#D1FAE5;
+  --orange:#F59E0B; --orange-l:#FEF3C7;
+  --red:#EF4444; --red-l:#FEE2E2;
+  --grey:#9CA3AF; --grey-l:#F3F4F6;
+  --r:10px; --rs:6px;
+  --sh:0 1px 3px rgba(0,0,0,.07);
+  --shm:0 4px 12px rgba(0,0,0,.09);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--txt);font-size:15px;line-height:1.6;min-height:100vh}
+button{cursor:pointer;font-family:inherit}
+input,select{font-family:inherit}
+a{color:var(--accent)}
 
-    :root {
-      --navy:    #1C2951;
-      --orange:  #FF8C00;
-      --orange2: #FFA733;
-      --navy-lt: #2a3d6b;
-      --gray-bg: #F4F6FB;
-      --gray-1:  #E8EBF4;
-      --gray-2:  #C6CCE0;
-      --gray-3:  #8891AD;
-      --text:    #1C2951;
-      --text-sm: #5A6180;
-      --white:   #FFFFFF;
-      --green:   #22B573;
-      --red:     #E94F4F;
-      --yellow:  #F5A623;
-      --shadow:  0 2px 16px rgba(28,41,81,.10);
-      --radius:  12px;
-    }
+/* ── Header ─────────────────────────────── */
+.hdr{
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:0 20px;display:flex;align-items:center;justify-content:space-between;
+  height:58px;position:sticky;top:0;z-index:100;box-shadow:var(--sh);
+}
+.brand{display:flex;flex-direction:column;line-height:1.15}
+.brand-title{font-size:17px;font-weight:700;letter-spacing:-.3px}
+.brand-sub{font-size:10.5px;font-weight:600;color:var(--accent);letter-spacing:.1em;text-transform:uppercase}
+.sync-info{font-size:12px;color:var(--txt3);display:flex;align-items:center;gap:6px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--grey);flex-shrink:0;transition:background .3s}
+.dot.ok{background:var(--green)}
+.dot.err{background:var(--red)}
+.dot.loading{background:var(--orange);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
-    html, body {
-      font-family: 'Sarabun', sans-serif;
-      background: var(--gray-bg);
-      color: var(--text);
-      min-height: 100vh;
-      font-size: 15px;
-    }
+/* ── Tabs ────────────────────────────────── */
+.tabs{background:var(--surface);border-bottom:1px solid var(--border);display:flex;padding:0 20px;gap:2px}
+.tab{padding:11px 16px;border:none;background:none;font-size:14px;font-weight:500;color:var(--txt2);
+  border-bottom:2px solid transparent;margin-bottom:-1px;display:flex;align-items:center;gap:6px;transition:color .15s,border-color .15s}
+.tab:hover{color:var(--txt)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
 
-    /* =============================================
-       LAYOUT SHELL
-    ============================================= */
-    .app-wrapper {
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
+/* ── Pages ───────────────────────────────── */
+.page{display:none;padding:20px;max-width:980px;margin:0 auto}
+.page.active{display:block}
 
-    /* =============================================
-       TOP HEADER (BRAND)
-    ============================================= */
-    .brand-header {
-      background: var(--navy);
-      color: var(--white);
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 14px 24px;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: 0 2px 12px rgba(28,41,81,.25);
-    }
-    .brand-icon {
-      width: 44px; height: 44px;
-      background: var(--orange);
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 20px;
-    }
-    .brand-text h1 {
-      font-size: 20px; font-weight: 700; letter-spacing: .02em;
-      line-height: 1;
-    }
-    .brand-text p {
-      font-size: 11px; font-weight: 400; opacity: .65; letter-spacing: .12em;
-      text-transform: uppercase; margin-top: 2px;
-    }
+/* ── Toolbar ─────────────────────────────── */
+.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.lbl{font-size:13px;color:var(--txt2);font-weight:500;white-space:nowrap}
+.field{display:flex;align-items:center;gap:7px}
+.field input[type=date],.field select{
+  padding:7px 11px;border:1px solid var(--border);border-radius:var(--rs);
+  background:var(--surface);font-size:14px;color:var(--txt);outline:none;transition:border-color .15s}
+.field input[type=date]:focus,.field select:focus{border-color:var(--accent)}
+.sep{width:1px;height:26px;background:var(--border)}
+.search-wrap{position:relative;flex:1;min-width:170px}
+.search-wrap input{
+  width:100%;padding:7px 11px 7px 32px;border:1px solid var(--border);
+  border-radius:var(--rs);font-size:14px;background:var(--surface);outline:none;transition:border-color .15s}
+.search-wrap input:focus{border-color:var(--accent)}
+.search-ico{position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--txt3)}
 
-    /* =============================================
-       TAB NAV
-    ============================================= */
-    .tab-nav {
-      background: var(--navy);
-      display: flex;
-      border-top: 1px solid rgba(255,255,255,.08);
-    }
-    .tab-btn {
-      flex: 1;
-      padding: 11px 8px;
-      color: rgba(255,255,255,.5);
-      font-family: 'Sarabun', sans-serif;
-      font-size: 13px; font-weight: 500;
-      background: none; border: none; cursor: pointer;
-      border-bottom: 3px solid transparent;
-      transition: all .2s;
-      display: flex; align-items: center; justify-content: center; gap: 6px;
-    }
-    .tab-btn.active {
-      color: var(--white);
-      border-bottom-color: var(--orange);
-      background: rgba(255,255,255,.05);
-    }
-    .tab-btn:hover { color: rgba(255,255,255,.85); }
+/* ── Summary chips ───────────────────────── */
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600;border:1px solid transparent}
+.chip-b{background:var(--accent-l);color:var(--accent);border-color:#C7D0FF}
+.chip-g{background:var(--green-l);color:#065F46;border-color:#A7F3D0}
+.chip-gr{background:var(--grey-l);color:var(--txt2);border-color:var(--border)}
 
-    /* =============================================
-       STICKY FILTER BAR
-    ============================================= */
-    .sticky-filter {
-      position: sticky;
-      top: 73px;
-      z-index: 90;
-      background: var(--white);
-      box-shadow: 0 2px 12px rgba(28,41,81,.08);
-      padding: 14px 20px;
-    }
+/* ── Student Card ────────────────────────── */
+.list{display:flex;flex-direction:column;gap:8px}
+.card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);padding:13px 15px;box-shadow:var(--sh);
+  transition:box-shadow .15s,opacity .2s;
+}
+.card:hover{box-shadow:var(--shm)}
+.card.done{opacity:.6;background:var(--grey-l)}
+.card-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.card-info{flex:1;min-width:0}
+.name-row{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap}
+.nickname{font-size:16px;font-weight:700}
+.fullname{font-size:13.5px;color:var(--txt2)}
+.meta{display:flex;flex-wrap:wrap;gap:5px 14px;margin-top:6px;font-size:13px;color:var(--txt2)}
+.mi{display:flex;align-items:center;gap:3px}
+.mi-ico{font-size:12px}
+.badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:12px;font-weight:600}
+.badge-c{background:var(--accent-l);color:var(--accent)}
+.alerts{display:flex;flex-direction:column;gap:3px;margin-top:7px}
+.alert{display:flex;align-items:center;gap:5px;padding:4px 9px;border-radius:var(--rs);font-size:12px;font-weight:500}
+.alert-w{background:var(--orange-l);color:#92400E}
+.alert-d{background:var(--red-l);color:#991B1B}
 
-    .filter-row {
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-      flex-wrap: wrap;
-    }
+/* ── Check Buttons ───────────────────────── */
+.btns{display:flex;flex-direction:column;gap:5px;align-items:flex-end;flex-shrink:0}
+.cbtn{
+  display:flex;align-items:center;gap:5px;padding:7px 13px;
+  border-radius:var(--rs);border:1.5px solid var(--border);
+  background:var(--surface);color:var(--txt);font-size:13px;font-weight:600;
+  transition:all .15s;white-space:nowrap;min-width:108px;justify-content:center}
+.cbtn:hover:not(:disabled){border-color:var(--accent);color:var(--accent);background:var(--accent-l)}
+.cbtn.saving{opacity:.6;pointer-events:none}
+.cbtn.done{background:var(--green);border-color:var(--green);color:#fff;pointer-events:none}
+.cbtn.locked{background:var(--grey-l);border-color:var(--border);color:var(--grey);pointer-events:none}
 
-    .filter-group {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      flex: 1;
-      min-width: 120px;
-    }
-    .filter-group label {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--gray-3);
-      text-transform: uppercase;
-      letter-spacing: .06em;
-    }
-    .filter-group input[type="date"],
-    .filter-group select {
-      padding: 8px 10px;
-      border: 1.5px solid var(--gray-1);
-      border-radius: 8px;
-      font-family: 'Sarabun', sans-serif;
-      font-size: 14px;
-      color: var(--text);
-      background: var(--gray-bg);
-      outline: none;
-      transition: border .2s;
-      width: 100%;
-    }
-    .filter-group input:focus,
-    .filter-group select:focus {
-      border-color: var(--navy);
-      background: var(--white);
-    }
+/* ── States ──────────────────────────────── */
+.state{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:56px 20px;color:var(--txt3);text-align:center;gap:9px}
+.state-ico{font-size:34px}
+.state p{font-size:14px}
+.spinner{width:30px;height:30px;border:3px solid var(--border);border-top-color:var(--accent);
+  border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-    /* TYPE TOGGLE BUTTONS */
-    .type-toggle {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      flex: 0 0 auto;
-    }
-    .toggle-btn {
-      padding: 9px 18px;
-      border-radius: 8px;
-      font-family: 'Sarabun', sans-serif;
-      font-size: 14px; font-weight: 600;
-      border: 2px solid var(--gray-2);
-      background: var(--white);
-      color: var(--gray-3);
-      cursor: pointer;
-      transition: all .2s;
-    }
-    .toggle-btn.active-inperson {
-      background: var(--navy); border-color: var(--navy); color: var(--white);
-    }
-    .toggle-btn.active-online {
-      background: var(--orange); border-color: var(--orange); color: var(--white);
-    }
+/* ── Report Table ────────────────────────── */
+.rtable{width:100%;border-collapse:collapse;background:var(--surface);
+  border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);font-size:14px}
+.rtable thead{background:var(--bg)}
+.rtable th{padding:10px 13px;text-align:left;font-size:11.5px;font-weight:600;
+  color:var(--txt2);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)}
+.rtable td{padding:10px 13px;border-bottom:1px solid var(--border-light);vertical-align:middle}
+.rtable tr:last-child td{border-bottom:none}
+.rtable tr:hover td{background:var(--bg)}
+.num{color:var(--txt3);font-size:12px;font-weight:600;width:34px}
+.pill{display:inline-block;padding:2px 9px;border-radius:20px;font-size:12px;font-weight:600}
+.pill-live{background:var(--accent-l);color:var(--accent)}
+.pill-draw{background:var(--orange-l);color:#92400E}
+.pill-online{background:var(--green-l);color:#065F46}
 
-    /* REFRESH BTN */
-    .btn-refresh {
-      padding: 9px 16px;
-      background: var(--navy);
-      color: var(--white);
-      border: none;
-      border-radius: 8px;
-      font-family: 'Sarabun', sans-serif;
-      font-size: 13px; font-weight: 600;
-      cursor: pointer;
-      transition: background .2s;
-      display: flex; align-items: center; gap: 6px;
-    }
-    .btn-refresh:hover { background: var(--navy-lt); }
+/* ── Toast ───────────────────────────────── */
+#toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(16px);
+  background:#1A1D23;color:#fff;padding:9px 20px;border-radius:8px;
+  font-size:14px;font-weight:500;opacity:0;transition:opacity .25s,transform .25s;
+  pointer-events:none;z-index:999;white-space:nowrap;max-width:90vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.ok{background:var(--green)}
+#toast.err{background:var(--red)}
 
-    /* =============================================
-       PAGE CONTENT
-    ============================================= */
-    .page { display: none; }
-    .page.active { display: block; }
-
-    .content-area { padding: 20px; max-width: 900px; margin: 0 auto; }
-
-    /* =============================================
-       STATS BAR (REPORT)
-    ============================================= */
-    .stats-bar {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-    .stat-card {
-      flex: 1;
-      background: var(--white);
-      border-radius: var(--radius);
-      padding: 14px 16px;
-      box-shadow: var(--shadow);
-      text-align: center;
-    }
-    .stat-card .num {
-      font-size: 26px; font-weight: 700; color: var(--navy);
-      line-height: 1;
-    }
-    .stat-card .lbl {
-      font-size: 12px; color: var(--gray-3); margin-top: 4px;
-    }
-    .stat-card.inperson .num { color: var(--navy); }
-    .stat-card.online   .num { color: var(--orange); }
-
-    /* =============================================
-       STUDENT CARDS
-    ============================================= */
-    #studentList { display: flex; flex-direction: column; gap: 10px; }
-
-    .student-card {
-      background: var(--white);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 14px 16px;
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 6px 12px;
-      align-items: start;
-      transition: opacity .2s, box-shadow .2s;
-      position: relative;
-    }
-    .student-card.checked {
-      background: var(--gray-1);
-      opacity: .7;
-      pointer-events: none;
-    }
-    .student-card.checked::after {
-      content: "✓ เช็คชื่อแล้ว";
-      position: absolute; top: 10px; right: 12px;
-      font-size: 11px; font-weight: 700;
-      color: var(--green);
-      background: rgba(34,181,115,.12);
-      padding: 3px 8px;
-      border-radius: 20px;
-    }
-
-    .stu-main { display: flex; flex-direction: column; gap: 3px; }
-    .stu-name {
-      font-size: 16px; font-weight: 700; color: var(--navy);
-      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-    }
-    .stu-nick {
-      background: var(--navy);
-      color: var(--white);
-      font-size: 12px; font-weight: 700;
-      padding: 2px 9px;
-      border-radius: 20px;
-    }
-    .stu-meta {
-      font-size: 12px; color: var(--gray-3);
-      display: flex; gap: 12px; flex-wrap: wrap;
-    }
-    .stu-meta span { display: flex; align-items: center; gap: 4px; }
-    .stu-meta i { color: var(--orange); font-size: 11px; }
-
-    .stu-course {
-      font-size: 12px; color: var(--text-sm);
-      margin-top: 4px;
-      display: flex; flex-wrap: wrap; gap: 8px;
-    }
-    .tag {
-      background: var(--gray-bg);
-      border: 1px solid var(--gray-1);
-      border-radius: 6px;
-      padding: 2px 8px;
-      font-size: 11px;
-    }
-    .tag.warn { background: #FFF3E0; border-color: #FFB74D; color: #E65100; }
-    .tag.danger { background: #FFEBEE; border-color: #EF9A9A; color: #C62828; }
-
-    /* CHECK BUTTONS */
-    .check-btns {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      align-items: flex-end;
-    }
-    .btn-check {
-      padding: 7px 14px;
-      border-radius: 8px;
-      font-family: 'Sarabun', sans-serif;
-      font-size: 12px; font-weight: 700;
-      border: none; cursor: pointer;
-      transition: all .2s;
-      white-space: nowrap;
-    }
-    .btn-check.inperson {
-      background: var(--navy); color: var(--white);
-    }
-    .btn-check.inperson:hover { background: var(--navy-lt); }
-    .btn-check.online {
-      background: var(--orange); color: var(--white);
-    }
-    .btn-check.online:hover { background: var(--orange2); }
-    .btn-check.drawing {
-      background: #7B5EA7; color: var(--white);
-    }
-    .btn-check.drawing:hover { background: #6A4F91; }
-
-    /* =============================================
-       REPORT TABLE
-    ============================================= */
-    .report-table {
-      width: 100%;
-      border-collapse: collapse;
-      background: var(--white);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
-    .report-table th {
-      background: var(--navy);
-      color: var(--white);
-      padding: 10px 14px;
-      font-size: 13px; font-weight: 600;
-      text-align: left;
-    }
-    .report-table td {
-      padding: 10px 14px;
-      font-size: 13px;
-      border-bottom: 1px solid var(--gray-1);
-      vertical-align: middle;
-    }
-    .report-table tr:last-child td { border-bottom: none; }
-    .report-table tr:hover td { background: var(--gray-bg); }
-
-    .badge {
-      display: inline-block;
-      padding: 2px 10px;
-      border-radius: 20px;
-      font-size: 11px; font-weight: 700;
-    }
-    .badge.inperson { background: rgba(28,41,81,.1); color: var(--navy); }
-    .badge.online   { background: rgba(255,140,0,.15); color: #B85C00; }
-
-    /* =============================================
-       EMPTY / LOADING / TOAST
-    ============================================= */
-    .empty-state {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--gray-3);
-    }
-    .empty-state i { font-size: 48px; margin-bottom: 12px; display: block; opacity: .4; }
-    .empty-state p { font-size: 15px; }
-
-    .loader {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--gray-3);
-      font-size: 15px;
-    }
-    .loader i { animation: spin 1s linear infinite; margin-right: 8px; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* TOAST */
-    #toast {
-      position: fixed;
-      bottom: 30px; left: 50%;
-      transform: translateX(-50%) translateY(20px);
-      background: var(--navy);
-      color: var(--white);
-      padding: 12px 24px;
-      border-radius: 10px;
-      font-size: 14px; font-weight: 600;
-      box-shadow: 0 4px 20px rgba(28,41,81,.3);
-      z-index: 9999;
-      opacity: 0;
-      pointer-events: none;
-      transition: all .3s;
-      max-width: 320px; text-align: center;
-    }
-    #toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-    #toast.success { background: var(--green); }
-    #toast.error   { background: var(--red); }
-    #toast.warning { background: var(--yellow); }
-
-    /* MODAL */
-    .modal-overlay {
-      display: none;
-      position: fixed; inset: 0;
-      background: rgba(28,41,81,.5);
-      z-index: 8000;
-      align-items: center; justify-content: center;
-    }
-    .modal-overlay.open { display: flex; }
-    .modal-box {
-      background: var(--white);
-      border-radius: 16px;
-      padding: 28px;
-      width: 90%; max-width: 400px;
-      box-shadow: 0 8px 40px rgba(28,41,81,.25);
-      text-align: center;
-    }
-    .modal-box .modal-icon {
-      font-size: 40px;
-      margin-bottom: 12px;
-    }
-    .modal-box h3 { font-size: 18px; color: var(--navy); margin-bottom: 8px; }
-    .modal-box p  { font-size: 14px; color: var(--text-sm); margin-bottom: 20px; }
-    .modal-actions { display: flex; gap: 10px; }
-    .modal-actions button {
-      flex: 1;
-      padding: 10px;
-      border-radius: 8px;
-      font-family: 'Sarabun', sans-serif;
-      font-size: 14px; font-weight: 700;
-      border: none; cursor: pointer;
-    }
-    .btn-confirm { background: var(--navy); color: var(--white); }
-    .btn-cancel  { background: var(--gray-1); color: var(--text); }
-
-    /* =============================================
-       RESPONSIVE
-    ============================================= */
-    @media (max-width: 600px) {
-      .filter-row { gap: 8px; }
-      .type-toggle { flex-wrap: wrap; }
-      .content-area { padding: 14px; }
-      .stats-bar { gap: 8px; }
-      .student-card { grid-template-columns: 1fr; }
-      .check-btns { flex-direction: row; flex-wrap: wrap; align-items: flex-start; }
-    }
-  </style>
+/* ── Responsive ──────────────────────────── */
+@media(max-width:580px){
+  .page{padding:12px}
+  .toolbar{flex-direction:column;align-items:stretch}
+  .field{flex-wrap:wrap}
+  .card-row{flex-direction:column}
+  .btns{flex-direction:row;flex-wrap:wrap;align-items:flex-start}
+}
+</style>
 </head>
 <body>
 
-<div class="app-wrapper">
+<header class="hdr">
+  <div class="brand">
+    <span class="brand-title">📋 ระบบเช็คชื่อ</span>
+    <span class="brand-sub">ARTNOLATE</span>
+  </div>
+  <div class="sync-info">
+    <div class="dot" id="sync-dot"></div>
+    <span id="sync-label">ยังไม่ได้โหลด</span>
+  </div>
+</header>
 
-  <!-- BRAND HEADER -->
-  <header class="brand-header">
-    <div class="brand-icon"><i class="fa-solid fa-palette"></i></div>
-    <div class="brand-text">
-      <h1>ระบบเช็คชื่อ</h1>
-      <p>ARTNOLATE</p>
+<nav class="tabs">
+  <button class="tab active" onclick="goTab('attendance',this)">
+    ✅ เช็คชื่อ
+  </button>
+  <button class="tab" onclick="goTab('report',this)">
+    📊 รายงานประจำวัน
+  </button>
+</nav>
+
+<div class="page active" id="page-attendance">
+
+  <div class="toolbar">
+    <div class="field">
+      <span class="lbl">📅 วันที่</span>
+      <input type="date" id="att-date" onchange="renderAttendance()"/>
     </div>
-  </header>
-
-  <!-- TAB NAV -->
-  <nav class="tab-nav">
-    <button class="tab-btn active" onclick="switchTab('check')">
-      <i class="fa-solid fa-clipboard-check"></i> เช็คชื่อ
-    </button>
-    <button class="tab-btn" onclick="switchTab('report')">
-      <i class="fa-solid fa-chart-bar"></i> รายงานประจำวัน
-    </button>
-  </nav>
-
-  <!-- =============================================
-       PAGE: CHECK ATTENDANCE
-  ============================================= -->
-  <div id="page-check" class="page active">
-
-    <!-- STICKY FILTERS -->
-    <div class="sticky-filter">
-      <div class="filter-row">
-        <!-- Date -->
-        <div class="filter-group" style="max-width:170px">
-          <label><i class="fa-solid fa-calendar"></i> วันที่</label>
-          <input type="date" id="checkDate" onchange="onFilterChange()" />
-        </div>
-
-        <!-- Type Toggle -->
-        <div class="filter-group" style="max-width:200px">
-          <label><i class="fa-solid fa-chalkboard-teacher"></i> รูปแบบ</label>
-          <div class="type-toggle">
-            <button class="toggle-btn active-inperson" id="btnInperson" onclick="setClassType('ติวสด')">ติวสด</button>
-            <button class="toggle-btn" id="btnOnline" onclick="setClassType('ออนไลน์')">ออนไลน์</button>
-          </div>
-        </div>
-
-        <!-- Department -->
-        <div class="filter-group">
-          <label><i class="fa-solid fa-building-columns"></i> ภาควิชา</label>
-          <select id="deptSelect" onchange="onFilterChange()">
-            <option value="ทั้งหมด">ทั้งหมด</option>
-            <option>ศิลปกรรม</option>
-            <option>สถาปัตยกรรม</option>
-            <option>ภูมิสถาปัตยกรรม/สถาปัตยกรรมไทย</option>
-            <option>สถาปัตยกรรมภายใน/ออกแบบภายใน</option>
-            <option>นิเทศศิลป์/ออกแบบการสื่อสาร</option>
-            <option>ภาพยนตร์</option>
-            <option>อนิเมชัน</option>
-            <option>การถ่ายภาพ</option>
-            <option>ศิลปอุตสาหกรรม/จิวเวลรี่</option>
-            <option>แฟชั่น</option>
-            <option>พื้นฐาน</option>
-          </select>
-        </div>
-
-        <!-- Refresh -->
-        <div class="filter-group" style="max-width:100px; justify-content: flex-end; align-self: flex-end;">
-          <button class="btn-refresh" onclick="loadStudents()">
-            <i class="fa-solid fa-arrows-rotate"></i>
-          </button>
-        </div>
-      </div>
+    <div class="sep"></div>
+    <div class="field">
+      <span class="lbl">🎓 ภาควิชา</span>
+      <select id="att-dept" onchange="renderAttendance()">
+        <option value="">— เลือกภาควิชา —</option>
+        <option>ศิลปกรรม</option>
+        <option>สถาปัตยกรรม</option>
+        <option>ภูมิสถาปัตยกรรม</option>
+        <option>สถาปัตยกรรมภายใน</option>
+        <option>นิเทศศิลป์</option>
+        <option>ภาพยนตร์</option>
+        <option>อนิเมชัน</option>
+        <option>การถ่ายภาพ</option>
+        <option>ศิลปอุตสาหกรรม</option>
+        <option>แฟชั่น</option>
+        <option>พื้นฐาน</option>
+      </select>
     </div>
-
-    <!-- STUDENT LIST -->
-    <div class="content-area">
-      <div id="studentList">
-        <div class="loader"><i class="fa-solid fa-circle-notch"></i> กำลังโหลดรายชื่อ...</div>
-      </div>
+    <div class="sep"></div>
+    <div class="search-wrap">
+      <span class="search-ico">🔍</span>
+      <input type="text" id="att-search" placeholder="ค้นหาชื่อ / โรงเรียน…" oninput="renderAttendance()"/>
     </div>
   </div>
 
-  <!-- =============================================
-       PAGE: REPORT
-  ============================================= -->
-  <div id="page-report" class="page">
-
-    <!-- REPORT DATE FILTER -->
-    <div class="sticky-filter">
-      <div class="filter-row">
-        <div class="filter-group" style="max-width:200px">
-          <label><i class="fa-solid fa-calendar-days"></i> วันที่ดูรายงาน</label>
-          <input type="date" id="reportDate" onchange="loadReport()" />
-        </div>
-        <div class="filter-group" style="max-width:100px; align-self:flex-end;">
-          <button class="btn-refresh" onclick="loadReport()">
-            <i class="fa-solid fa-arrows-rotate"></i>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div class="content-area">
-      <!-- STATS -->
-      <div class="stats-bar" id="reportStats" style="display:none">
-        <div class="stat-card">
-          <div class="num" id="statTotal">0</div>
-          <div class="lbl">รวมทั้งหมด</div>
-        </div>
-        <div class="stat-card inperson">
-          <div class="num" id="statInperson">0</div>
-          <div class="lbl">ติวสด</div>
-        </div>
-        <div class="stat-card online">
-          <div class="num" id="statOnline">0</div>
-          <div class="lbl">ออนไลน์</div>
-        </div>
-      </div>
-
-      <!-- TABLE -->
-      <div id="reportContent">
-        <div class="loader"><i class="fa-solid fa-circle-notch"></i> กำลังโหลด...</div>
-      </div>
-    </div>
+  <div class="chips" id="att-chips" style="display:none">
+    <div class="chip chip-b" id="chip-total">👥 0 คน</div>
+    <div class="chip chip-g" id="chip-checked">✅ เช็คแล้ว 0</div>
+    <div class="chip chip-gr" id="chip-left">⏳ รอเช็ค 0</div>
   </div>
 
-</div><!-- end app-wrapper -->
-
-<!-- TOAST -->
-<div id="toast"></div>
-
-<!-- MODAL -->
-<div class="modal-overlay" id="modal">
-  <div class="modal-box">
-    <div class="modal-icon" id="modalIcon">⚠️</div>
-    <h3 id="modalTitle">แจ้งเตือน</h3>
-    <p id="modalDesc"></p>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModal()">ยกเลิก</button>
-      <button class="btn-confirm" id="modalConfirm">ยืนยัน</button>
+  <div class="list" id="att-list">
+    <div class="state">
+      <div class="state-ico">🏫</div>
+      <p>เลือกภาควิชาเพื่อแสดงรายชื่อนักเรียน</p>
     </div>
   </div>
 </div>
 
-<!-- =============================================
-     MAIN SCRIPT
-============================================= -->
+<div class="page" id="page-report">
+  <div class="toolbar">
+    <div class="field">
+      <span class="lbl">📅 วันที่</span>
+      <input type="date" id="rep-date" onchange="renderReport()"/>
+    </div>
+  </div>
+  <div id="rep-content">
+    <div class="state"><div class="state-ico">📊</div><p>เลือกวันที่เพื่อดูรายงาน</p></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
 <script>
-// =============================================
-// CONFIG - แก้ URL ของ Google Apps Script ที่นี่
-// =============================================
+/* ─────────────────────────────────────────
+   CONFIG
+───────────────────────────────────────── */
+// นำ URL Web App ของคุณมาใส่ตรงนี้
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbydiV31SspWt7Y9kyTOIa09f1AzzgVQQiw_6h5-Ez6qk4ScQ_OgXjHnQJ1aoXvDBnuu/exec';
 
-// =============================================
-// STATE
-// =============================================
-let currentClassType = 'ติวสด';
-let allStudents = [];
-let checkedToday = {}; // phone -> classType
+/* ─────────────────────────────────────────
+   STATE
+───────────────────────────────────────── */
+let students  = [];          // Active rows from Student_Master
+let logCache  = [];          // Today's Attendance_Log rows (cached per date)
+let logDate   = '';          // Which date logCache belongs to
+let checked   = {};          // local { key: true } persisted in localStorage
 
-// =============================================
-// INIT
-// =============================================
-window.addEventListener('load', () => {
-  const today = todayStr();
-  document.getElementById('checkDate').value = today;
-  document.getElementById('reportDate').value = today;
-  loadStudents();
+/* ─────────────────────────────────────────
+   INIT
+───────────────────────────────────────── */
+window.addEventListener('DOMContentLoaded', () => {
+  const today = todayISO();
+  document.getElementById('att-date').value = today;
+  document.getElementById('rep-date').value = today;
+  loadLocal();
+  fetchStudents();
 });
 
-function todayStr() {
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth()+1).padStart(2,'0');
-  const dd = String(d.getDate()).padStart(2,'0');
-  return `${y}-${m}-${dd}`;
+/* ─────────────────────────────────────────
+   GAS HELPER
+───────────────────────────────────────── */
+function gasCall(params) {
+  const qs = new URLSearchParams(params).toString();
+  return fetch(`${GAS_URL}?${qs}`)
+    .then(r => r.json());
+}
+function gasPost(body) {
+  return fetch(GAS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify(body)
+  }).then(r => r.json());
 }
 
-// =============================================
-// TABS
-// =============================================
-function switchTab(tab) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('page-' + tab).classList.add('active');
-  event.currentTarget.classList.add('active');
-  if (tab === 'report') loadReport();
+/* ─────────────────────────────────────────
+   FETCH STUDENTS
+───────────────────────────────────────── */
+async function fetchStudents() {
+  setSyncState('loading','กำลังโหลด…');
+  try {
+    const data = await gasCall({ action: 'getStudents' });
+    if (data.error) throw new Error(data.error);
+    students = data.students || [];
+    setSyncState('ok', `โหลดแล้ว ${students.length} คน`);
+    renderAttendance();
+  } catch(e) {
+    setSyncState('err', 'โหลดไม่สำเร็จ — ' + e.message);
+    showList(`<div class="state"><div class="state-ico">⚠️</div><p>โหลดข้อมูลไม่สำเร็จ<br><small>${e.message}</small></p></div>`);
+  }
 }
 
-// =============================================
-// CLASS TYPE TOGGLE
-// =============================================
-function setClassType(type) {
-  currentClassType = type;
-  document.getElementById('btnInperson').className = 'toggle-btn' + (type === 'ติวสด' ? ' active-inperson' : '');
-  document.getElementById('btnOnline').className   = 'toggle-btn' + (type === 'ออนไลน์' ? ' active-online' : '');
-  renderStudentList();
+/* ─────────────────────────────────────────
+   FETCH LOG for date
+───────────────────────────────────────── */
+async function fetchLog(date) {
+  if (logDate === date) return logCache;  
+  try {
+    const data = await gasCall({ action: 'getLog', date });
+    logCache = data.rows || [];
+    logDate  = date;
+    return logCache;
+  } catch {
+    return [];
+  }
 }
 
-function onFilterChange() {
-  loadStudents();
-}
+/* ─────────────────────────────────────────
+   RENDER ATTENDANCE
+───────────────────────────────────────── */
+async function renderAttendance() {
+  const date  = document.getElementById('att-date').value;
+  const dept  = document.getElementById('att-dept').value;
+  const q     = document.getElementById('att-search').value.toLowerCase();
+  const chips = document.getElementById('att-chips');
 
-// =============================================
-// LOAD STUDENTS FROM GAS
-// =============================================
-function loadStudents() {
-  const date = document.getElementById('checkDate').value;
-  const dept = document.getElementById('deptSelect').value;
-
-  document.getElementById('studentList').innerHTML =
-    '<div class="loader"><i class="fa-solid fa-circle-notch"></i> กำลังโหลดรายชื่อ...</div>';
-
-  // Load checked list first, then students
-  callGAS('getCheckedToday', { date }, (checked) => {
-    checkedToday = {};
-    if (Array.isArray(checked)) {
-      checked.forEach(c => { checkedToday[c.phone] = c.classType; });
-    }
-
-    callGAS('getStudents', { classType: currentClassType, department: dept }, (students) => {
-      allStudents = students || [];
-      renderStudentList();
-    });
-  });
-}
-
-// =============================================
-// RENDER STUDENTS
-// =============================================
-function renderStudentList() {
-  const container = document.getElementById('studentList');
-
-  if (!allStudents.length) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <i class="fa-solid fa-user-slash"></i>
-        <p>ไม่พบรายชื่อนักเรียน<br>ที่ตรงกับเงื่อนไขที่เลือก</p>
-      </div>`;
+  if (!dept) {
+    chips.style.display = 'none';
+    showList(`<div class="state"><div class="state-ico">🏫</div><p>เลือกภาควิชาเพื่อแสดงรายชื่อนักเรียน</p></div>`);
+    return;
+  }
+  if (!students.length) {
+    chips.style.display = 'none';
+    showList(`<div class="state"><div class="spinner"></div><p>กำลังโหลดข้อมูล…</p></div>`);
     return;
   }
 
-  container.innerHTML = '';
-  allStudents.forEach((s, i) => {
-    const isChecked = checkedToday[s.phone] !== undefined;
-    const card = document.createElement('div');
-    card.className = 'student-card' + (isChecked ? ' checked' : '');
-    card.id = 'card-' + i;
+  // ── filter ──
+  let list = students.filter(s => {
+    const dm = s.dept && s.dept.includes(dept);
+    const qm = q ? (s.nickname+s.fullname+s.school).toLowerCase().includes(q) : true;
+    return dm && qm;
+  });
 
-    // Warnings
-    let tags = '';
-    if (s.warnRemaining) {
-      tags += `<span class="tag warn"><i class="fa-solid fa-triangle-exclamation"></i> ครั้งเหลือน้อย (${s.remaining})</span>`;
+  if (!list.length) {
+    chips.style.display = 'none';
+    showList(`<div class="state"><div class="state-ico">🔍</div><p>ไม่พบนักเรียนในภาควิชานี้</p></div>`);
+    return;
+  }
+
+  // ── sync log from sheet for this date (ดักซ้ำด้วย normPhone) ──
+  const logRows = await fetchLog(date);
+  const serverChecked = new Set();
+  logRows.forEach(r => {
+    if (r.phone && r.type) serverChecked.add(`${normPhone(r.phone)}__${r.type}`);
+  });
+
+  // ── today alerts ──
+  const today   = new Date(date);
+  const warn7   = new Date(date); warn7.setDate(warn7.getDate() + 7);
+
+  let checkedCount = 0;
+  const cards = list.map(s => {
+    const btns = buildBtns(s, date, serverChecked);
+    const anyDone = btns.some(b => b.done);
+    if (anyDone) checkedCount++;
+
+    const isMao   = /เหมา|mix/i.test(s.courseRaw);
+    const remNum  = parseInt(s.remaining);
+    const showRem = isMao ? '—' : (isNaN(remNum) ? s.remaining : remNum);
+    let alerts = '';
+    if (!isMao && !isNaN(remNum) && remNum <= 2) {
+      alerts += remNum === 0
+        ? `<div class="alert alert-d">⚠️ ครั้งเรียนหมดแล้ว กรุณาต่อคอร์ส</div>`
+        : `<div class="alert alert-w">⏳ เหลือครั้งเรียนอีก ${remNum} ครั้ง</div>`;
     }
-    if (s.warnExpiry) {
-      tags += `<span class="tag danger"><i class="fa-solid fa-clock"></i> คอร์สใกล้หมดอายุ (${s.courseExp})</span>`;
+    if (s.expiry) {
+      const exp = parseDateAny(s.expiry);
+      if (exp) {
+        if (exp <= today)      alerts += `<div class="alert alert-d">🗓️ อายุคอร์สหมดแล้ว (${fmtDate(s.expiry)})</div>`;
+        else if (exp <= warn7) alerts += `<div class="alert alert-w">🗓️ อายุคอร์สใกล้หมด — ${fmtDate(s.expiry)}</div>`;
+      }
     }
 
-    // Buttons
-    let btns = '';
-    if (!isChecked) {
-      s.buttons.forEach(b => {
-        let cls = 'online';
-        if (b.type === 'ติวสด') cls = 'inperson';
-        if (b.type === 'ออนไลน์วาดเส้น') cls = 'drawing';
-        btns += `<button class="btn-check ${cls}" onclick="handleCheck(${i}, '${escHtml(b.type)}', '${escHtml(b.label)}')">${b.label}</button>`;
-      });
-    }
-
-    // Remaining display
-    const remDisp = s.remaining === '' ? '—' : s.remaining;
-    const expDisp = s.courseExp || '—';
-
-    card.innerHTML = `
-      <div class="stu-main">
-        <div class="stu-name">
-          <span class="stu-nick">${escHtml(s.nickname)}</span>
-          <span>${escHtml(s.fullname)}</span>
-        </div>
-        <div class="stu-meta">
-          <span><i class="fa-solid fa-school"></i>${escHtml(s.school)}</span>
-          <span><i class="fa-solid fa-rotate"></i>รอบ: ${escHtml(s.period)}</span>
-        </div>
-        <div class="stu-course">
-          <span class="tag"><i class="fa-solid fa-book"></i> ${escHtml(s.course)}</span>
-          <span class="tag">คงเหลือ: ${escHtml(remDisp)}</span>
-          <span class="tag">หมดอายุ: ${escHtml(expDisp)}</span>
-          ${tags}
-        </div>
+    return `
+<div class="card${anyDone?' done':''}" id="card-${esc(s.phone)}">
+  <div class="card-row">
+    <div class="card-info">
+      <div class="name-row">
+        <span class="nickname">${esc(s.nickname)}</span>
+        <span class="fullname">${esc(s.fullname)}</span>
       </div>
-      <div class="check-btns">${btns}</div>
-    `;
+      <div class="meta">
+        <span class="mi"><span class="mi-ico">🏫</span>${esc(s.school)}</span>
+        <span class="mi"><span class="mi-ico">📱</span>${esc(s.phone)}</span>
+        <span class="mi"><span class="mi-ico">🎓</span>${esc(s.dept)}</span>
+      </div>
+      <div class="meta" style="margin-top:5px">
+        <span class="badge badge-c">${esc(s.courseRaw)}</span>
+        ${!isMao?`<span class="mi"><span class="mi-ico">🔢</span>เหลือ ${esc(String(showRem))} ครั้ง</span>`:''}
+        ${s.expiry?`<span class="mi"><span class="mi-ico">📆</span>${fmtDate(s.expiry)}</span>`:''}
+        ${s.round?`<span class="mi"><span class="mi-ico">⏰</span>รอบคอร์สที่ ${esc(s.round)}</span>`:''}
+      </div>
+      ${alerts?`<div class="alerts">${alerts}</div>`:''}
+    </div>
+    <div class="btns" id="btns-${esc(s.phone)}">
+      ${btns.map(b => renderCBtn(b, s, date)).join('')}
+    </div>
+  </div>
+</div>`;
+  });
 
-    container.appendChild(card);
+  showList(cards.join(''));
+
+  // chips
+  chips.style.display = 'flex';
+  document.getElementById('chip-total').textContent   = `👥 ${list.length} คน`;
+  document.getElementById('chip-checked').textContent  = `✅ เช็คแล้ว ${checkedCount}`;
+  document.getElementById('chip-left').textContent     = `⏳ รอเช็ค ${list.length - checkedCount}`;
+}
+
+/* ─────────────────────────────────────────
+   BUILD BUTTONS logic
+───────────────────────────────────────── */
+function buildBtns(s, date, serverChecked) {
+  const c = s.courseRaw || '';
+  const isMao    = /เหมา|mix/i.test(c);
+  const hasLive  = /ติวสด/.test(c);
+  const hasOnl   = /ออนไลน์/.test(c);
+
+  let types = [];
+  if (isMao || (hasLive && hasOnl)) {
+    types = ['ติวสด','ออนไลน์วิชาภาค','ออนไลน์วาดเส้น'];
+  } else if (hasLive) {
+    types = ['ติวสด'];
+  } else if (hasOnl) {
+    types = ['ออนไลน์วิชาภาค','ออนไลน์วาดเส้น'];
+  } else {
+    types = ['ติวสด']; 
+  }
+
+  return types.map(t => {
+    const done = serverChecked.has(`${normPhone(s.phone)}__${t}`) || isCheckedLocal(s.phone, date, t);
+    return { type: t, label: typeLabel(t, s.dept), done };
   });
 }
 
-// =============================================
-// HANDLE CHECK BUTTON
-// =============================================
-let pendingCheck = null;
+function typeLabel(type, dept) {
+  if (type === 'ติวสด')          return '✏️ ติวสด';
+  if (type === 'ออนไลน์วาดเส้น')   return '🖊️ วาดเส้น';
+  if (type === 'ออนไลน์วิชาภาค') return `📚 ${deptSubject(dept)}`;
+  return type;
+}
 
-function handleCheck(idx, btnType, btnLabel) {
-  const s = allStudents[idx];
-  const date = document.getElementById('checkDate').value;
+function deptSubject(dept) {
+  const map = {
+    'ศิลปกรรม':'วิชาศิลปกรรม','สถาปัตยกรรม':'วิชาสถาปัตย์',
+    'ภูมิสถาปัตยกรรม':'วิชาภูมิสถาปัตย์','สถาปัตยกรรมภายใน':'วิชาออกแบบภายใน',
+    'นิเทศศิลป์':'วิชานิเทศศิลป์','ภาพยนตร์':'วิชาภาพยนตร์',
+    'อนิเมชัน':'วิชาอนิเมชัน','การถ่ายภาพ':'วิชาถ่ายภาพ',
+    'ศิลปอุตสาหกรรม':'วิชาจิวเวลรี่','แฟชั่น':'วิชาแฟชั่น','พื้นฐาน':'วิชาพื้นฐาน'
+  };
+  for (const k in map) { if ((dept||'').includes(k)) return map[k]; }
+  return 'วิชาภาค';
+}
 
-  let warnings = [];
-  if (s.warnRemaining) warnings.push(`⚠️ จำนวนครั้งเหลือน้อย (${s.remaining} ครั้ง)`);
-  if (s.warnExpiry)    warnings.push(`⏰ คอร์สใกล้หมดอายุ (${s.courseExp})`);
+function renderCBtn(b, s, date) {
+  if (b.done) return `<button class="cbtn done">${b.label} ✓</button>`;
+  // อัปเดตข้อมูลส่งไป Backend ให้ตรงกับ 7 คอลัมน์ (date, phone, nickname, school, dept, round, type)
+  const onclick = `doCheck(this,'${esc(s.phone)}','${esc(s.nickname)}','${esc(s.school)}','${esc(s.dept)}','${esc(s.round)}','${b.type}','${esc(b.label)}','${date}')`;
+  return `<button class="cbtn" onclick="${onclick}">${b.label}</button>`;
+}
 
-  pendingCheck = { idx, btnType, s, date };
+/* ─────────────────────────────────────────
+   DO CHECK (แก้ไข: กด 1 ปุ่ม แถบเปลี่ยนสีทันที)
+───────────────────────────────────────── */
+async function doCheck(btnEl, phone, nickname, school, dept, round, type, label, date) {
+  if (btnEl.classList.contains('saving') || btnEl.classList.contains('done')) return;
+  btnEl.classList.add('saving');
+  btnEl.textContent = '⏳…';
 
-  if (warnings.length > 0) {
-    openModal(
-      '⚠️',
-      `เช็คชื่อ: ${s.nickname} – ${s.fullname}`,
-      warnings.join('\n') + '\n\nยืนยันเช็คชื่อ ' + btnLabel + ' หรือไม่?',
-      () => doSaveAttendance(pendingCheck, btnLabel)
-    );
-  } else {
-    doSaveAttendance(pendingCheck, btnLabel);
+  try {
+    const resp = await gasPost({
+      action: 'addLog',
+      date, phone, nickname, school, dept, round, type
+    });
+    if (resp && resp.error) throw new Error(resp.error);
+
+    markLocal(phone, date, type);
+    logCache.push({ date, phone, nickname, school, dept, round, type });
+
+    btnEl.classList.remove('saving');
+    btnEl.classList.add('done');
+    btnEl.textContent = label + ' ✓';
+    showToast(`✅ เช็คชื่อ ${nickname} — ${label}`, 'ok');
+
+    // --- ส่วนที่แก้ไข: เพิ่ม class 'done' ให้การ์ดใบนี้ทันที ---
+    const card = btnEl.closest('.card');
+    if (card) {
+      card.classList.add('done');
+    }
+    // ---------------------------------------------------
+
+    updateChips();
+  } catch(e) {
+    btnEl.classList.remove('saving');
+    btnEl.textContent = label;
+    showToast('บันทึกไม่สำเร็จ: ' + e.message, 'err');
   }
 }
 
-function doSaveAttendance(pending, btnLabel) {
-  closeModal();
-  const { idx, btnType, s, date } = pending;
 
-  const payload = {
-    date: date,
-    nickname: s.nickname,
-    school: s.school,
-    phone: s.phone,
-    department: s.department,
-    period: s.period,
-    classType: btnType
-  };
-
-  callGAS('saveAttendance', payload, (result) => {
-    if (result.success) {
-      checkedToday[s.phone] = btnType;
-      renderStudentList();
-      showToast('✓ เช็คชื่อ ' + s.nickname + ' สำเร็จ', 'success');
-    } else {
-      showToast('✗ ' + result.message, 'error');
-    }
+function updateChips() {
+  const all   = document.querySelectorAll('.card');
+  const done  = document.querySelectorAll('.card.done');
+  document.getElementById('chip-total').textContent   = `👥 ${all.length} คน`;
+  document.getElementById('chip-checked').textContent  = `✅ เช็คแล้ว ${done.length}`;
+  document.getElementById('chip-left').textContent     = `⏳ รอเช็ค ${all.length - done.length}`;
+  document.querySelectorAll('.card').forEach(card => {
+    const btns = card.querySelectorAll('.cbtn');
+    const allDone = [...btns].every(b => b.classList.contains('done'));
+    if (allDone && btns.length) card.classList.add('done');
   });
 }
 
-// =============================================
-// LOAD REPORT
-// =============================================
-function loadReport() {
-  const date = document.getElementById('reportDate').value;
-  document.getElementById('reportContent').innerHTML =
-    '<div class="loader"><i class="fa-solid fa-circle-notch"></i> กำลังโหลด...</div>';
-  document.getElementById('reportStats').style.display = 'none';
+/* ─────────────────────────────────────────
+   RENDER REPORT
+───────────────────────────────────────── */
+async function renderReport() {
+  const date = document.getElementById('rep-date').value;
+  const box  = document.getElementById('rep-content');
+  box.innerHTML = `<div class="state"><div class="spinner"></div><p>กำลังโหลด…</p></div>`;
 
-  callGAS('getAttendanceReport', { date }, (data) => {
-    // Stats
-    document.getElementById('statTotal').textContent    = data.summary.total;
-    document.getElementById('statInperson').textContent = data.summary.inPerson;
-    document.getElementById('statOnline').textContent   = data.summary.online;
-    document.getElementById('reportStats').style.display = data.summary.total > 0 ? 'flex' : 'none';
+  try {
+    const data = await gasCall({ action: 'getLog', date });
+    const allRows = data.rows || [];
 
-    // Table
-    if (!data.records.length) {
-      document.getElementById('reportContent').innerHTML = `
-        <div class="empty-state">
-          <i class="fa-solid fa-calendar-xmark"></i>
-          <p>ไม่มีข้อมูลเช็คชื่อในวันที่ที่เลือก</p>
-        </div>`;
+    // กรองประวัติรายวันให้แสดงเฉพาะวันที่ตรงกันเป๊ะๆ
+    const rows = allRows.filter(r => isSameDate(r.date, date));
+
+    if (!rows.length) {
+      box.innerHTML = `<div class="state"><div class="state-ico">📭</div><p>ไม่มีข้อมูลวันที่ ${fmtDateISO(date)}</p></div>`;
       return;
     }
 
-    // Format display date
-    const [y, m, dd] = date.split('-');
-    const thMonths = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
-    const dispDate = `${parseInt(dd)} ${thMonths[parseInt(m)-1]} ${parseInt(y)+543}`;
+    const tbody = rows.map((r,i) => `
+<tr>
+  <td class="num">${i+1}</td>
+  <td><strong>${esc(r.nickname||'')}</strong></td>
+  <td style="font-size:13px;color:var(--txt2)">${esc(r.school||'-')}</td>
+  <td>${esc(r.phone||'')}</td>
+  <td style="font-size:13px;color:var(--txt2)">${esc(r.dept||'-')}</td>
+  <td style="color:var(--txt3);font-size:13px">${esc(r.round||'-')}</td>
+  <td><span class="pill ${pillClass(r.type)}">${esc(r.type||'')}</span></td>
+</tr>`).join('');
 
-    let rows = data.records.map(r => {
-      const btype = /ติวสด/i.test(r.classType) ? 'inperson' : 'online';
-      const blabel = /ติวสด/i.test(r.classType) ? 'ติวสด' : r.classType;
-      return `
-        <tr>
-          <td style="color:var(--gray-3)">${r.no}</td>
-          <td><strong>${escHtml(r.nickname)}</strong></td>
-          <td>${escHtml(r.school)}</td>
-          <td>${escHtml(r.dept)}</td>
-          <td><span class="badge ${btype}">${escHtml(blabel)}</span></td>
-        </tr>`;
-    }).join('');
-
-    document.getElementById('reportContent').innerHTML = `
-      <p style="font-size:12px;color:var(--gray-3);margin-bottom:10px">
-        <i class="fa-solid fa-calendar"></i> ${dispDate}
-      </p>
-      <div style="overflow-x:auto">
-        <table class="report-table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>ชื่อเล่น</th>
-              <th>โรงเรียน</th>
-              <th>ภาควิชา</th>
-              <th>รูปแบบ</th>
-            </tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>
-      </div>`;
-  });
+    box.innerHTML = `
+<div class="chips"><div class="chip chip-b">📋 ${fmtDateISO(date)} — ${rows.length} รายการ</div></div>
+<table class="rtable">
+  <thead><tr><th>#</th><th>ชื่อเล่น</th><th>โรงเรียน</th><th>เบอร์โทรศัพท์</th><th>ภาควิชา</th><th>รอบ</th><th>รูปแบบ</th></tr></thead>
+  <tbody>${tbody}</tbody>
+</table>`;
+  } catch(e) {
+    box.innerHTML = `<div class="state"><div class="state-ico">⚠️</div><p>โหลดไม่สำเร็จ: ${e.message}</p></div>`;
+  }
 }
 
-// =============================================
-// GAS CALLER
-// =============================================
-function callGAS(fn, params, cb) {
-  const url = GAS_URL + '?fn=' + encodeURIComponent(fn) +
-    '&params=' + encodeURIComponent(JSON.stringify(params));
-
-  fetch(url)
-    .then(r => r.json())
-    .then(data => {
-      if (data.error) {
-        showToast('❌ ' + data.error, 'error');
-        return;
-      }
-      cb(data.result);
-    })
-    .catch(err => {
-      console.error(err);
-      showToast('❌ เชื่อมต่อเซิร์ฟเวอร์ไม่ได้', 'error');
-    });
+function pillClass(t) {
+  if (!t) return '';
+  if (t.includes('ติวสด'))   return 'pill-live';
+  if (t.includes('วาดเส้น')) return 'pill-draw';
+  return 'pill-online';
 }
 
-// =============================================
-// MODAL
-// =============================================
-let modalCb = null;
-function openModal(icon, title, desc, cb) {
-  document.getElementById('modalIcon').textContent = icon;
-  document.getElementById('modalTitle').textContent = title;
-  document.getElementById('modalDesc').textContent  = desc;
-  document.getElementById('modalConfirm').onclick = () => { cb(); closeModal(); };
-  document.getElementById('modal').classList.add('open');
-  modalCb = cb;
+/* ─────────────────────────────────────────
+   LOCAL STORAGE — fallback persist
+───────────────────────────────────────── */
+function lcKey(ph, dt, tp) { return `anl__${ph}__${dt}__${tp}`; }
+function loadLocal() {
+  try { checked = JSON.parse(localStorage.getItem('anl_checked')||'{}'); } catch{ checked={}; }
 }
-function closeModal() {
-  document.getElementById('modal').classList.remove('open');
-  modalCb = null;
-}
-document.getElementById('modal').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
-});
+function markLocal(ph, dt, tp) { checked[lcKey(ph,dt,tp)]=true; localStorage.setItem('anl_checked',JSON.stringify(checked)); }
+function isCheckedLocal(ph, dt, tp) { return !!checked[lcKey(ph,dt,tp)]; }
 
-// =============================================
-// TOAST
-// =============================================
-let toastTimer;
-function showToast(msg, type = '') {
+/* ─────────────────────────────────────────
+   UTILS
+───────────────────────────────────────── */
+function todayISO() { return new Date().toISOString().slice(0,10); }
+
+// ฟังก์ชันแปลงเบอร์โทร: ตัดอักขระที่ไม่ใช่ตัวเลขออก และตัด '0' ข้างหน้าออกเพื่อความแม่นยำตอนเทียบ
+function normPhone(p) {
+  return String(p || '').replace(/[^0-9]/g, '').replace(/^0+/, '');
+}
+
+// ฟังก์ชันตรวจเช็ควันที่ให้แม่นยำ
+function isSameDate(logDateStr, targetIso) {
+  if (!logDateStr || !targetIso) return false;
+  return logDateStr.includes(targetIso) || targetIso.includes(logDateStr);
+}
+
+function parseDateAny(str) {
+  if (!str) return null;
+  const d = new Date(str);
+  return isNaN(d) ? null : d;
+}
+function fmtDate(str) {
+  const d = parseDateAny(str);
+  if (!d) return str;
+  return d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'});
+}
+function fmtDateISO(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d)) return iso;
+  return d.toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'});
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function showList(html) { document.getElementById('att-list').innerHTML = html; }
+
+function setSyncState(st, msg) {
+  const dot = document.getElementById('sync-dot');
+  const lbl = document.getElementById('sync-label');
+  dot.className = 'dot ' + st;
+  lbl.textContent = msg;
+}
+
+let tTimer;
+function showToast(msg, cls='') {
   const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'show ' + type;
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { t.className = ''; }, 3000);
+  t.textContent = msg; t.className = 'show ' + cls;
+  clearTimeout(tTimer);
+  tTimer = setTimeout(()=>{ t.className=''; }, 2800);
 }
 
-// =============================================
-// UTIL
-// =============================================
-function escHtml(str) {
-  return String(str)
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;');
+function goTab(tab, el) {
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-'+tab).classList.add('active');
+  if (tab === 'report') renderReport();
 }
 </script>
+
 </body>
 </html>
+
+
+
