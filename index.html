@@ -637,7 +637,7 @@ async function fetchStudentHistory() {
         }).join('');
       
       selectorContainer.style.display = 'block';
-      box.innerHTML = `<div class="state"><div class="state-ico">👆</div><p>พบชื่อเล่นซ้ำกัน ${studentsList.length} คน<br>กรุณาเลือกข้อมูลของคุณที่ช่อง "Dropdown ตัวเลือก" ด้านบน</p></div>`;
+      box.innerHTML = `<div class="state"><div class="state-ico">👆</div><p>พบชื่อเล่นซ้ำกัน ${studentsList.length} คน<br>กรุณาเลือกข้อมูลของคุณที่ตัวเลือกด้านบน</p></div>`;
     }
   } catch(e) {
     box.innerHTML = `<div class="state"><div class="state-ico">⚠️</div><p>เกิดข้อผิดพลาด: ${e.message}</p></div>`;
