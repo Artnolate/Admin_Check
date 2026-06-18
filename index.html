@@ -74,10 +74,10 @@ border-bottom:3px solid transparent;margin-bottom:-1px;display:flex;align-items:
 }
 .lbl{font-size:13px;color:var(--txt2);font-weight:600;white-space:nowrap}
 .field{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.field input[type=date],.field input[type=tel],.field select{
+.field input[type=date],.field input[type=text],.field select{
   padding:8px 12px;border:1px solid var(--border);border-radius:var(--rs);
   background:var(--surface);font-size:14px;color:var(--txt);outline:none;transition:border-color .15s}
-.field input[type=date]:focus,.field input[type=tel]:focus,.field select:focus{border-color:var(--primary)}
+.field input[type=date]:focus,.field input[type=text]:focus,.field select:focus{border-color:var(--primary)}
 .sep{width:1px;height:30px;background:var(--border)}
 
 /* ── Toggle Switch ───────────────────────── */
@@ -120,7 +120,7 @@ border-bottom:3px solid transparent;margin-bottom:-1px;display:flex;align-items:
 .alerts{display:flex;flex-direction:column;gap:3px;margin-top:8px}
 .alert{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:var(--rs);font-size:12px;font-weight:500}
 .alert-w{background:var(--orange-l);color:#92400E}
-.alert-d">background:var(--red-l);color:#991B1B}
+.alert-d{background:var(--red-l);color:#991B1B}
 
 /* ── Check Buttons ───────────────────────── */
 .btns{display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0}
@@ -160,6 +160,12 @@ border-bottom:3px solid transparent;margin-bottom:-1px;display:flex;align-items:
 .pill{display:inline-block;padding:3px 11px;border-radius:20px;font-size:12px;font-weight:600}
 .pill-live{background:#E8EFFF;color:var(--primary);font-weight:700}
 .pill-online{background:#FFE5CC;color:#B8740F;font-weight:700}
+
+/* ── Profile Block ────────────────────────── */
+.profile-block{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:20px;box-shadow:var(--sh);}
+.profile-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:12px;}
+.profile-grid div{font-size:14px;color:var(--txt);}
+.profile-grid strong{color:var(--primary);font-weight:600;}
 
 /* ── Toast ───────────────────────────────── */
 #toast{
@@ -272,15 +278,24 @@ border-bottom:3px solid transparent;margin-bottom:-1px;display:flex;align-items:
 <div class="page" id="page-my-history">
   <div class="toolbar">
     <div class="field">
-      <span class="lbl">📱 ค้นหาประวัติด้วยเบอร์โทรศัพท์</span>
-      <input type="tel" id="history-phone" placeholder="เช่น 0812345678" style="min-width:200px;"/>
+      <span class="lbl">🔍 ค้นหาประวัติด้วยชื่อเล่น</span>
+      <input type="text" id="history-nickname" placeholder="ระบุชื่อเล่นของคุณ" style="min-width:180px;"/>
       <button class="cbtn live" onclick="fetchStudentHistory()" style="min-width:80px; padding:8px 20px;">🔍 ค้นหา</button>
     </div>
   </div>
+
+  <div id="history-selector-container" style="margin-bottom: 16px; display: none;">
+    <div class="field" style="background: var(--surface); padding: 12px 16px; border-radius: var(--r); border: 1px solid var(--accent); box-shadow: var(--sh);">
+      <span class="lbl" style="color: var(--accent);">⚠️ พบชื่อซ้ำกัน โปรดเลือกข้อมูลของคุณตามเบอร์โทรศัพท์:</span>
+      <select id="history-student-select" onchange="onHistoryStudentSelectChange()" style="padding:8px 12px; min-width: 280px; border-color: var(--accent);">
+      </select>
+    </div>
+  </div>
+
   <div id="history-content">
     <div class="state">
       <div class="state-ico">🔍</div>
-      <p>กรอกเบอร์โทรศัพท์สมัครเรียน เพื่อตรวจสอบประวัติเข้าเรียนย้อนหลังของตนเอง</p>
+      <p>กรอกชื่อเล่นเพื่อตรวจสอบประวัติการเข้าเรียนรายรอบคอร์สเรียนของตนเอง</p>
     </div>
   </div>
 </div>
@@ -301,6 +316,7 @@ let logCache    = [];
 let logDate     = '';
 let checked     = {};
 let formatMode  = 'live';
+let historyData = { students: [], logs: [] }; // จัดเก็บข้อมูลผลลัพธ์จากการค้นหาประวัติย้อนหลังล่าสุด
 
 /* ─────────────────────────────────────────
    INIT
@@ -579,57 +595,142 @@ async function renderReport() {
 }
 
 /* ─────────────────────────────────────────
-   STUDENT HISTORY LOOKUP (NEW)
+   STUDENT HISTORY LOOKUP (NEW CONDITION)
 ───────────────────────────────────────── */
 async function fetchStudentHistory() {
-  const phoneInput = document.getElementById('history-phone').value.trim();
+  const nicknameInput = document.getElementById('history-nickname').value.trim();
   const box = document.getElementById('history-content');
-  if (!phoneInput) {
-    showToast('❌ กรุณากรอกเบอร์โทรศัพท์', 'err');
+  const selectorContainer = document.getElementById('history-selector-container');
+  const selectEl = document.getElementById('history-student-select');
+
+  if (!nicknameInput) {
+    showToast('❌ กรุณากรอกชื่อเล่นสำหรับค้นหา', 'err');
     return;
   }
 
-  box.innerHTML = `<div class="state"><div class="spinner"></div><p>กำลังดึงประวัติการเข้าเรียนของคุณ…</p></div>`;
+  // เคลียร์ผลลัพธ์เดิมและเปิดสถานะ Loading
+  selectorContainer.style.display = 'none';
+  selectEl.innerHTML = '';
+  box.innerHTML = `<div class="state"><div class="spinner"></div><p>กำลังค้นหาข้อมูลของคุณ…</p></div>`;
 
   try {
-    const data = await gasCall({ action: 'getStudentHistory', phone: phoneInput });
-    const rows = data.rows || [];
+    // ส่งคำขอค้นหาไปยัง backend โดยอิงตามชื่อเล่น
+    const data = await gasCall({ action: 'getStudentHistory', nickname: nicknameInput });
+    historyData = data; 
+    
+    const studentsList = data.students || [];
 
-    if (!rows.length) {
-      box.innerHTML = `<div class="state"><div class="state-ico">📭</div><p>ไม่พบประวัติการเข้าเรียนของเบอร์โทรศัพท์นี้<br><small>ตรวจสอบความถูกต้อง หรือติดต่อแอดมิน</small></p></div>`;
+    if (!studentsList.length) {
+      box.innerHTML = `<div class="state"><div class="state-ico">📭</div><p>ไม่พบประวัติการเรียนของชื่อเล่น "${esc(nicknameInput)}"<br><small>กรุณาตรวจสอบความถูกต้อง หรือติดต่อแอดมิน</small></p></div>`;
       return;
     }
 
-    const studentName = rows[0].nickname || 'นักเรียน';
-    const tbody = rows.map((r, i) => `
-<tr>
-  <td class="num">${i+1}</td>
-  <td><strong>${fmtDateISO(r.date)}</strong></td>
-  <td>${esc(r.dept || '—')}</td>
-  <td style="text-align:center;">${esc(r.round || '—')}</td>
-  <td><span class="pill ${pillClass(r.type)}">${esc(r.type || '—')}</span></td>
-</tr>`).join('');
-
-    box.innerHTML = `
-<div class="chips" style="margin-bottom:14px;">
-  <div class="chip chip-b">👤 ชื่อเล่น: ${esc(studentName)}</div>
-  <div class="chip chip-g">📈 เข้าเรียนทั้งหมด: ${rows.length} ครั้ง</div>
-</div>
-<table class="rtable">
-  <thead>
-    <tr>
-      <th>#</th>
-      <th>วันที่เข้าเรียน</th>
-      <th>ภาควิชา</th>
-      <th style="text-align:center;">รอบคอร์สที่</th>
-      <th>รูปแบบวิชา</th>
-    </tr>
-  </thead>
-  <tbody>${tbody}</tbody>
-</table>`;
+    if (studentsList.length === 1) {
+      // มีชื่อนี้เพียงคนเดียวในระบบ → แสดงตารางข้อมูลทันที
+      renderStudentHistoryData(studentsList[0].phone);
+    } else {
+      // มีชื่อซ้ำกันหลายคนในระบบ → แปลงข้อมูลเป็น Dropdown แยกตามเบอร์โทรศัพท์และโรงเรียน
+      selectEl.innerHTML = `<option value="">— กรุณาเลือกข้อมูลของคุณเพื่อตรวจสอบ —</option>` + 
+        studentsList.map(s => {
+          const formattedPhone = s.phone ? s.phone.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3') : 'ไม่ระบุเบอร์';
+          return `<option value="${esc(s.phone)}">${esc(s.nickname)} (เบอร์: ${esc(formattedPhone)}) — โรงเรียน ${esc(s.school || 'ไม่ระบุ')}</option>`;
+        }).join('');
+      
+      selectorContainer.style.display = 'block';
+      box.innerHTML = `<div class="state"><div class="state-ico">👆</div><p>พบชื่อเล่นซ้ำกัน ${studentsList.length} คน<br>กรุณาเลือกข้อมูลของคุณที่ช่อง "Dropdown ตัวเลือก" ด้านบน</p></div>`;
+    }
   } catch(e) {
     box.innerHTML = `<div class="state"><div class="state-ico">⚠️</div><p>เกิดข้อผิดพลาด: ${e.message}</p></div>`;
   }
+}
+
+// ฟังก์ชันเมื่อผู้เรียนคลิกเลือกประวัติจากเมนู Dropdown
+function onHistoryStudentSelectChange() {
+  const selectedPhone = document.getElementById('history-student-select').value;
+  if (selectedPhone) {
+    renderStudentHistoryData(selectedPhone);
+  } else {
+    document.getElementById('history-content').innerHTML = `<div class="state"><div class="state-ico">👆</div><p>กรุณาเลือกข้อมูลของคุณที่ช่องด้านบน</p></div>`;
+  }
+}
+
+// ฟังก์ชันสำหรับ Render ข้อมูลส่วนตัวด้านบน และจัดตารางแสดงผลประวัติการเรียน
+function renderStudentHistoryData(selectedPhone) {
+  const box = document.getElementById('history-content');
+  const student = historyData.students.find(s => s.phone === selectedPhone);
+  
+  if (!student) {
+    box.innerHTML = `<div class="state"><div class="state-ico">⚠️</div><p>ไม่พบโปรไฟล์นักเรียนที่เลือก</p></div>`;
+    return;
+  }
+
+  // ล้างเบอร์โทรศัพท์เพื่อคัดกรอง Log
+  const cleanSelectedPhone = String(selectedPhone).replace(/[^0-9]/g, '').replace(/^0+/, '');
+  const studentLogs = (historyData.logs || []).filter(l => {
+    return String(l.phone).replace(/[^0-9]/g, '').replace(/^0+/, '') === cleanSelectedPhone;
+  });
+
+  const displayPhone = student.phone ? student.phone.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3') : '—';
+  
+  // 1. Render แผงแสดงข้อมูลนักเรียนไว้ที่ด้านบนสุด
+  let headerHtml = `
+  <div class="profile-block">
+    <div class="profile-grid">
+      <div><strong>👤 ชื่อเล่น:</strong> ${esc(student.nickname)}</div>
+      <div><strong>🏫 โรงเรียน:</strong> ${esc(student.school || '—')}</div>
+      <div><strong>📱 เบอร์โทรศัพท์:</strong> ${esc(displayPhone)}</div>
+      <div><strong>🎓 ภาควิชา:</strong> ${esc(student.dept || '—')}</div>
+    </div>
+  </div>`;
+
+  if (!studentLogs.length) {
+    box.innerHTML = headerHtml + `<div class="state"><div class="state-ico">📭</div><p>ไม่พบประวัติการเช็คชื่อเข้าเรียนของนักเรียนคนนี้</p></div>`;
+    return;
+  }
+
+  // 2. จัดกลุ่ม Log เข้าเรียนตาม "รอบคอร์สเรียน"
+  const roundsMap = {};
+  studentLogs.forEach(l => {
+    const rName = l.round || 'ไม่ระบุรอบคอร์ส';
+    if (!roundsMap[rName]) roundsMap[rName] = [];
+    roundsMap[rName].push(l);
+  });
+
+  let tablesHtml = '';
+
+  // 3. วนลูปตารางแสดงผลแยกตามรอบคอร์สเรียน พร้อมรันจำนวนครั้งเรียนจากเก่าไปใหม่ (วันที่เรียนแรกสุด = ครั้งที่ 1)
+  Object.keys(roundsMap).forEach(rName => {
+    // เรียงวันที่จากอดีตไปปัจจุบัน (Ascending) เพื่อรัน "ครั้งที่ 1, 2, 3..." ตามลำดับเวลาจริงที่คุณต้องการ
+    const sortedLogs = roundsMap[rName].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    
+    const tbody = sortedLogs.map((r, index) => `
+    <tr>
+      <td class="num" style="width: 120px; text-align: center; font-weight: bold; color: var(--primary);">ครั้งที่ ${index + 1}</td>
+      <td>${fmtDateISO(r.date)}</td>
+      <td><span class="pill ${pillClass(r.type)}">${esc(r.type || '—')}</span></td>
+    </tr>`).join('');
+
+    tablesHtml += `
+    <div style="margin-bottom: 25px;">
+      <div class="chip chip-b" style="margin-bottom: 10px; font-size: 14px; font-weight: 700; border-radius: var(--rs);">
+        🔄 รอบคอร์สเรียน: ${esc(rName)} (เข้าเรียนสะสมในรอบนี้ ${sortedLogs.length} ครั้ง)
+      </div>
+      <table class="rtable">
+        <thead>
+          <tr>
+            <th style="width: 130px; text-align: center;">ครั้งที่เข้าเรียน</th>
+            <th>วันที่เข้าเรียน</th>
+            <th>รูปแบบวิชา</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${tbody}
+        </tbody>
+      </table>
+    </div>`;
+  });
+
+  box.innerHTML = headerHtml + tablesHtml;
 }
 
 function pillClass(t) {
